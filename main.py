@@ -21,8 +21,9 @@ def _sys_ex(tp, val, tb):
 sys.excepthook = _sys_ex
 
 APP_NAME = "Fulgor PCista"
-APP_VERSION = "1.2.0 (Build 15)"
-WINDOW_TITLE = f"{APP_NAME} (v{APP_VERSION})"
+APP_VERSION = "1.2.0"
+APP_CODENAME = "Ororo"
+WINDOW_TITLE = f"{APP_NAME} (v{APP_VERSION} - {APP_CODENAME})"
 
 
 class Api:
@@ -152,7 +153,7 @@ class WinFormsTrayManager:
             try:
                 logging.info("_init: creating NotifyIcon...")
                 self.notify = WinForms.NotifyIcon()
-                self.notify.Text = f"{APP_NAME} - Monitor Térmico"[:63]
+                self.notify.Text = f"{APP_NAME} (v{APP_VERSION} - {APP_CODENAME})"[:63]
 
                 # Infallible multi-tiered icon discovery
                 ico = None
