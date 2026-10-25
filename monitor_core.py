@@ -306,21 +306,15 @@ class MonitorCore:
             pkt[2] = (t_int // 10) % 10
             pkt[3] = t_int % 10
 
-            if is_cpu:
-                # CPU mode: 0x10 sets fixed CPU mode with °C glyph (never alternates)
-                pkt[4] = 0x10
-                # CPU device indicator flag in byte 7
-                pkt[7] = 0x01
-            else:
-                # GPU mode: 0x01 sets °F glyph as marker (numeric temp in Celsius)
-                pkt[4] = 0x01
-                # GPU device indicator flag in byte 7
-                pkt[7] = 0x00
+            # Mode flag: 0x10 for CPU (°C), 0x01 for GPU (°F marker)
+            pkt[4] = 0x10 if is_cpu else 0x01
 
-            # Secondary 2-digit display (CPU load % or GPU power Watts / load %)
-            s_int = max(0, min(99, int(round(sec_val))))
-            pkt[5] = (s_int // 10) % 10  # Tens digit
-            pkt[6] = s_int % 10          # Units digit
+            # Secondary 3-digit display (CPU load % or GPU power Watts / load %)
+            # pkt[5] = hundreds, pkt[6] = tens, pkt[7] = units
+            s_int = max(0, min(999, int(round(sec_val))))
+            pkt[5] = (s_int // 100) % 10  # Hundreds digit
+            pkt[6] = (s_int // 10) % 10   # Tens digit
+            pkt[7] = s_int % 10           # Units digit
         else:
             # Blank display digits when LED switch is off
             for i in range(1, 8):
