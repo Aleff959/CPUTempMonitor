@@ -102,7 +102,7 @@
     /* Main Container */
     .content {
       flex: 1;
-      padding: 10px 20px 18px 20px;
+      padding: 10px 20px 14px 20px;
       display: flex;
       flex-direction: column;
       gap: 12px;
@@ -357,7 +357,7 @@
       color: var(--md-sys-color-outline);
     }
 
-    /* Controls Panel */
+    /* Controls Panel (Transmissão Térmica para o Visor) */
     .controls-panel {
       background: var(--md-sys-color-surface-container);
       border-radius: 18px;
@@ -423,6 +423,280 @@
       line-height: 1.4;
       padding-top: 4px;
       border-top: 1px solid rgba(255, 255, 255, 0.05);
+    }
+
+    /* Footer Bar with "Sobre" Button */
+    .footer-bar {
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      padding: 2px 2px 0 2px;
+    }
+
+    .btn-about {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      color: var(--md-sys-color-outline);
+      padding: 5px 13px;
+      border-radius: 14px;
+      font-size: 11.5px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .btn-about:hover {
+      background: var(--md-sys-color-surface-container-high);
+      color: var(--md-sys-color-primary);
+      border-color: rgba(128, 212, 255, 0.3);
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+      transform: translateY(-1px);
+    }
+
+    .btn-about:active {
+      transform: translateY(0);
+    }
+
+    /* Modal Backdrop & Dialog */
+    .modal-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.75);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .modal-backdrop.open {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .modal-card {
+      background: #181c22;
+      border-radius: 22px;
+      width: 90%;
+      max-width: 480px;
+      max-height: 88vh;
+      overflow-y: auto;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      box-shadow: 0 24px 48px rgba(0, 0, 0, 0.8);
+      padding: 20px 22px;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      transform: scale(0.92);
+      transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .modal-backdrop.open .modal-card {
+      transform: scale(1);
+    }
+
+    .modal-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+      padding-bottom: 12px;
+    }
+
+    .modal-branding {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .modal-icon {
+      width: 36px;
+      height: 36px;
+      background: linear-gradient(135deg, #00b0ff, #0069c0);
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 18px;
+      font-weight: 800;
+      color: #fff;
+      box-shadow: 0 4px 12px rgba(0, 176, 255, 0.35);
+    }
+
+    .modal-title {
+      font-size: 16px;
+      font-weight: 700;
+      color: #fff;
+      letter-spacing: 0.3px;
+    }
+
+    .modal-subtitle {
+      font-size: 11.5px;
+      color: var(--md-sys-color-primary);
+      font-weight: 600;
+    }
+
+    .modal-close-btn {
+      background: rgba(255, 255, 255, 0.08);
+      border: none;
+      color: var(--md-sys-color-outline);
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      font-size: 13px;
+      transition: all 0.2s;
+    }
+
+    .modal-close-btn:hover {
+      background: rgba(255, 255, 255, 0.16);
+      color: #fff;
+    }
+
+    .modal-body {
+      display: flex;
+      flex-direction: column;
+      gap: 13px;
+    }
+
+    .about-sec {
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+    }
+
+    .about-sec-lbl {
+      font-size: 10px;
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+      color: var(--md-sys-color-outline);
+      font-weight: 700;
+    }
+
+    .device-card {
+      background: var(--md-sys-color-surface);
+      border-radius: 14px;
+      padding: 11px 14px;
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+    }
+
+    .device-name {
+      font-size: 13.5px;
+      font-weight: 700;
+      color: var(--md-sys-color-primary);
+    }
+
+    .device-meta {
+      font-size: 11px;
+      color: var(--md-sys-color-outline);
+      line-height: 1.4;
+    }
+
+    .links-grid {
+      display: flex;
+      flex-direction: column;
+      gap: 7px;
+    }
+
+    .ext-link-card {
+      background: var(--md-sys-color-surface);
+      border-radius: 12px;
+      padding: 10px 14px;
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .ext-link-card:hover {
+      background: rgba(128, 212, 255, 0.08);
+      border-color: rgba(128, 212, 255, 0.3);
+      transform: translateX(2px);
+    }
+
+    .link-title {
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--md-sys-color-on-surface);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .link-arrow {
+      font-size: 11.5px;
+      color: var(--md-sys-color-primary);
+      font-weight: 700;
+    }
+
+    .about-text-p {
+      font-size: 11.5px;
+      line-height: 1.5;
+      color: var(--md-sys-color-on-surface-variant);
+      background: var(--md-sys-color-surface);
+      padding: 10px 12px;
+      border-radius: 12px;
+      border: 1px solid rgba(255, 255, 255, 0.05);
+    }
+
+    .tech-tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+    }
+
+    .tech-tag {
+      font-size: 10px;
+      font-weight: 600;
+      background: rgba(255, 255, 255, 0.05);
+      padding: 3px 9px;
+      border-radius: 8px;
+      color: var(--md-sys-color-outline);
+      border: 1px solid rgba(255, 255, 255, 0.05);
+    }
+
+    .modal-footer-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding-top: 10px;
+      border-top: 1px solid rgba(255, 255, 255, 0.08);
+    }
+
+    .footer-author {
+      font-size: 10.5px;
+      color: var(--md-sys-color-outline);
+    }
+
+    .btn-modal-close-action {
+      background: var(--md-sys-color-primary);
+      color: var(--md-sys-color-on-primary);
+      border: none;
+      padding: 6px 16px;
+      border-radius: 14px;
+      font-size: 11.5px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .btn-modal-close-action:hover {
+      box-shadow: 0 2px 10px rgba(0, 176, 255, 0.4);
     }
   </style>
 </head>
@@ -536,6 +810,81 @@
         * Conforme a especificação do controlador USB, a Placa de Vídeo utiliza o marcador luminoso °F para identificação visual instantânea no display.
       </div>
     </div>
+
+    <!-- Footer Bar with "Sobre" aligned to the right (red box) -->
+    <div class="footer-bar">
+      <button class="btn-about" onclick="openAboutModal()" title="Informações e créditos do aplicativo">
+        <span>ℹ️</span> Sobre
+      </button>
+    </div>
+  </div>
+
+  <!-- About Modal Dialog -->
+  <div class="modal-backdrop" id="aboutModal" onclick="closeAboutModal(event)">
+    <div class="modal-card" onclick="event.stopPropagation()">
+      <div class="modal-header">
+        <div class="modal-branding">
+          <div class="modal-icon">⚡</div>
+          <div>
+            <div class="modal-title">Fulgor PCista</div>
+            <div class="modal-subtitle">v1.2.0 (Ororo) • Comp. 15</div>
+          </div>
+        </div>
+        <button class="modal-close-btn" onclick="closeAboutModal()" title="Fechar">✕</button>
+      </div>
+
+      <div class="modal-body">
+        <!-- Hardware Homologado -->
+        <div class="about-sec">
+          <span class="about-sec-lbl">🎯 Dispositivo Homologado</span>
+          <div class="device-card">
+            <span class="device-name">AIR COOLER TEMP 6 PRO BLACK</span>
+            <span class="device-meta">Cooler Digital com display duplo integrado via USB HID (VID 1A2C / PID 4984). Telemetria nativa direta em milissegundos sem drivers pesados.</span>
+          </div>
+        </div>
+
+        <!-- Links Oficiais -->
+        <div class="about-sec">
+          <span class="about-sec-lbl">🔗 Links & Referências</span>
+          <div class="links-grid">
+            <div class="ext-link-card" onclick="openExternalUrl('https://risemode.com/p/temp-6-pro-black-argb')">
+              <span class="link-title">🌐 Rise Mode - TEMP 6 PRO ARGB (Original)</span>
+              <span class="link-arrow">Abrir ↗</span>
+            </div>
+            <div class="ext-link-card" onclick="openExternalUrl('https://github.com/Aleff959/CPUTempMonitor')">
+              <span class="link-title">🐙 Repositório Oficial no GitHub (Aleff959)</span>
+              <span class="link-arrow">Acessar ↗</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Créditos Comunidade Linux -->
+        <div class="about-sec">
+          <span class="about-sec-lbl">🤝 Créditos & Engenharia Reversa</span>
+          <p class="about-text-p">
+            Agradecimento especial à comunidade Open Source e ao desenvolvedor Linux que realizou a engenharia reversa inicial do protocolo USB HID do cooler digital, tornando possível a comunicação e o controle nativo do visor.
+          </p>
+        </div>
+
+        <!-- Stack de Tecnologia -->
+        <div class="about-sec">
+          <span class="about-sec-lbl">⚙️ Engenharia & Telemetria</span>
+          <div class="tech-tags">
+            <span class="tech-tag">NVAPI Hot Spot</span>
+            <span class="tech-tag">LibreHardwareMonitor</span>
+            <span class="tech-tag">USB HID Direct</span>
+            <span class="tech-tag">Windows 11 Dark Mode</span>
+            <span class="tech-tag">Material You Design</span>
+            <span class="tech-tag">Python 3.12 Standalone</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="modal-footer-row">
+        <span class="footer-author">Feito para a comunidade PCista • Código Aberto</span>
+        <button class="btn-modal-close-action" onclick="closeAboutModal()">Fechar</button>
+      </div>
+    </div>
   </div>
 
   <script>
@@ -549,6 +898,27 @@
       document.getElementById('cardGpu').classList.toggle('active-target', currentDevice === 'GPU');
       if (window.pywebview && window.pywebview.api) {
         pywebview.api.set_mode(currentDevice).catch(() => {});
+      }
+    }
+
+    function openAboutModal() {
+      const modal = document.getElementById('aboutModal');
+      if (modal) modal.classList.add('open');
+    }
+
+    function closeAboutModal(e) {
+      if (e && e.target && e.target !== document.getElementById('aboutModal') && !e.target.classList.contains('modal-close-btn') && !e.target.classList.contains('btn-modal-close-action')) {
+        return;
+      }
+      const modal = document.getElementById('aboutModal');
+      if (modal) modal.classList.remove('open');
+    }
+
+    function openExternalUrl(url) {
+      if (window.pywebview && window.pywebview.api && window.pywebview.api.open_url) {
+        pywebview.api.open_url(url);
+      } else {
+        window.open(url, '_blank');
       }
     }
 

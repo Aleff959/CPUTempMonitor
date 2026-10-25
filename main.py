@@ -41,6 +41,15 @@ class Api:
         self._core.set_led(state)
         return True
 
+    def open_url(self, url):
+        import webbrowser
+        try:
+            webbrowser.open(url)
+            return True
+        except Exception as e:
+            logging.error(f"Failed to open url {url}: {e}")
+            return False
+
 
 def apply_dark_titlebar():
     """Apply Windows 11 dark immersive titlebar matching Material You #111418 surface."""
@@ -247,7 +256,7 @@ def main():
         url=f"file:///{html_path.replace(os.sep, '/')}",
         js_api=api,
         width=550,
-        height=620,
+        height=640,
         resizable=False,
         frameless=False,
         hidden=start_hidden,
