@@ -395,7 +395,7 @@
     <div class="app-branding">
       <div class="app-icon">❄</div>
       <div class="app-title">CPU TEMP Monitor</div>
-      <span class="version-tag">v1.0.1 (Build 13)</span>
+      <span class="version-tag">v1.1.0 (Build 14)</span>
     </div>
     <div class="usb-badge" id="usbStatusBadge">Cooler USB Conectado</div>
   </div>
@@ -443,7 +443,7 @@
       <div class="metric-card" id="cardGpu" onclick="setDevice('GPU')" title="Clique para fixar exibição na GPU">
         <div class="card-header">
           <div class="card-title">
-            <span>🎮 GPU</span>
+            <span>🎮 GPU (HOT SPOT)</span>
           </div>
           <span class="live-chip" id="chipGpu">DISPLAY ATIVO</span>
         </div>
@@ -452,6 +452,10 @@
           <span class="temp-deg">°C</span>
         </div>
         <div class="extra-stats">
+          <div class="stat-item">
+            <span class="stat-lbl">Core</span>
+            <span class="stat-val" id="valGpuCore">-- °C</span>
+          </div>
           <div class="stat-item">
             <span class="stat-lbl">Uso</span>
             <span class="stat-val" id="valGpuLoad">--%</span>
@@ -529,6 +533,10 @@
       document.getElementById('valCpuPower').innerText = (data.cpu_power && data.cpu_power > 0 ? data.cpu_power : '--') + ' W';
 
       document.getElementById('valGpuTemp').innerText = (data.gpu_temp && data.gpu_temp > 0) ? data.gpu_temp : '--';
+      const gpuCoreEl = document.getElementById('valGpuCore');
+      if (gpuCoreEl) {
+        gpuCoreEl.innerText = (data.gpu_core_temp && data.gpu_core_temp > 0 ? data.gpu_core_temp : '--') + ' °C';
+      }
       document.getElementById('valGpuLoad').innerText = (data.gpu_load !== undefined ? data.gpu_load : '--') + '%';
       document.getElementById('valGpuPower').innerText = (data.gpu_power && data.gpu_power > 0 ? data.gpu_power : '--') + ' W';
 
@@ -564,7 +572,7 @@
         document.getElementById('bannerUnitBadge').style.color = '#c4e7ff';
         document.documentElement.style.setProperty('--md-sys-color-primary', '#80d4ff');
       } else {
-        document.getElementById('bannerActiveDevice').innerText = 'GPU (Placa de Vídeo)';
+        document.getElementById('bannerActiveDevice').innerText = 'GPU (Hot Spot NVAPI)';
         document.getElementById('bannerUnitBadge').innerText = 'Marcador Telinha: °F';
         document.getElementById('bannerUnitBadge').style.background = '#4a2800';
         document.getElementById('bannerUnitBadge').style.color = '#ffdcbe';

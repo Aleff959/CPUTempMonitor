@@ -73,7 +73,9 @@ class MonitorCore:
             "cpu_temp": 0.0,
             "cpu_load": 0.0,
             "cpu_power": 0.0,
-            "gpu_temp": 0.0,
+            "gpu_temp": 0.0,         # Effective Hot Spot temperature for display & cooler
+            "gpu_core_temp": 0.0,    # GPU Core temperature
+            "gpu_hotspot": 0.0,      # Explicit Hot Spot temperature
             "gpu_load": 0.0,
             "gpu_power": 0.0,
             "mb_temp": 0.0,
@@ -86,6 +88,9 @@ class MonitorCore:
         self.server_proc = None
         self.hid_handle = None
         self.server_dir = self._find_server_dir()
+        self.lhm_gpu = None
+        self.lhm_comp = None
+        self._init_lhm_gpu()
 
         # Load persisted preference from registry
         self._load_registry_preferences()
@@ -99,6 +104,44 @@ class MonitorCore:
         # Start background worker (starts server, reads sensors, drives USB HID cooler)
         self.thread = threading.Thread(target=self._worker_loop, daemon=True)
         self.thread.start()
+
+    def _init_lhm_gpu(self):
+        """Direct NVAPI GPU initialization via LibreHardwareMonitorLib for Hot Spot telemetry."""
+        try:
+            candidates = [
+                os.path.join(self.server_dir, "LibreHardwareMonitorLib.dll"),
+                os.path.join(os.path.dirname(os.path.abspath(__file__)), "LibreHardwareMonitorLib.dll"),
+            ]
+            lib_path = None
+            for c in candidates:
+                if os.path.exists(c):
+                    lib_path = c
+                    break
+
+            if not lib_path:
+                return
+
+            import pythonnet
+            try:
+                pythonnet.load()
+            except Exception:
+                pass
+            import clr
+            clr.AddReference(os.path.abspath(lib_path))
+            import LibreHardwareMonitor.Hardware as LHM
+
+            comp = LHM.Computer()
+            comp.IsGpuEnabled = True
+            comp.Open()
+
+            for hw in comp.Hardware:
+                if "gpu" in str(hw.HardwareType).lower():
+                    self.lhm_gpu = hw
+                    self.lhm_comp = comp
+                    break
+        except Exception:
+            self.lhm_gpu = None
+            self.lhm_comp = None
 
     def _find_server_dir(self):
         candidates = []
@@ -388,9 +431,15 @@ class MonitorCore:
     def _worker_loop(self):
         self._ensure_internal_server()
         last_nvidia_check = 0.0
+        last_lhm_attempt = 0.0
 
         while self.running:
             now = time.time()
+
+            # Attempt LHM GPU init if not active yet
+            if not self.lhm_gpu and (now - last_lhm_attempt >= 5.0):
+                last_lhm_attempt = now
+                self._init_lhm_gpu()
 
             # 1. Read shared memory if available
             b = self._read_shared_memory()
@@ -406,18 +455,54 @@ class MonitorCore:
                 except Exception:
                     pass
 
-            # 2. Fallbacks if shared memory is still warming up or missing sensors
+            # 2. Direct NVAPI Hot Spot & GPU telemetry from LibreHardwareMonitor
+            lhm_hotspot = 0.0
+            lhm_core = 0.0
+            lhm_pwr = 0.0
+            lhm_load = 0.0
+            if self.lhm_gpu:
+                try:
+                    self.lhm_gpu.Update()
+                    for s in self.lhm_gpu.Sensors:
+                        stype = str(s.SensorType).lower()
+                        sname = str(s.Name).lower()
+                        val = float(s.Value) if s.Value is not None else 0.0
+                        if "temperature" in stype:
+                            if "hot spot" in sname or "hotspot" in sname:
+                                lhm_hotspot = val
+                            elif "core" in sname or "gpu" in sname:
+                                if lhm_core == 0.0:
+                                    lhm_core = val
+                        elif "power" in stype and ("package" in sname or "gpu" in sname or "core" in sname or "power" in sname):
+                            if val > lhm_pwr:
+                                lhm_pwr = val
+                        elif "load" in stype and ("core" in sname or "gpu" in sname):
+                            if val > lhm_load:
+                                lhm_load = val
+                except Exception:
+                    pass
+
+            # Fallbacks if shared memory is still warming up or missing sensors
             if cpu_load <= 0.0:
                 try:
                     cpu_load = psutil.cpu_percent(interval=None)
                 except Exception:
                     pass
 
-            if gpu_temp <= 0.0 and (now - last_nvidia_check >= 2.0):
+            if (gpu_temp <= 0.0 and lhm_core <= 0.0) and (now - last_nvidia_check >= 2.0):
                 last_nvidia_check = now
                 nv = self._read_nvidia_fallback()
                 if nv:
                     gpu_temp, gpu_load, gpu_pwr = nv
+
+            # Prefer direct NVAPI metrics when available
+            core_temp = lhm_core if lhm_core > 0 else gpu_temp
+            hotspot_temp = lhm_hotspot
+            effective_gpu_temp = hotspot_temp if hotspot_temp > 0 else core_temp
+            if lhm_pwr > 0:
+                gpu_pwr = lhm_pwr
+            if lhm_load > 0:
+                gpu_load = lhm_load
 
             # 3. Update state quickly under lock
             with self.lock:
@@ -427,9 +512,14 @@ class MonitorCore:
                     self.stats["cpu_load"] = round(cpu_load, 1)
                 if cpu_pwr > 0:
                     self.stats["cpu_power"] = round(cpu_pwr, 1)
-                if gpu_temp > 0:
-                    self.stats["gpu_temp"] = round(gpu_temp, 1)
-                if gpu_load >= 0 and (b is not None or gpu_temp > 0):
+
+                if effective_gpu_temp > 0:
+                    self.stats["gpu_temp"] = round(effective_gpu_temp, 1)
+                if core_temp > 0:
+                    self.stats["gpu_core_temp"] = round(core_temp, 1)
+                if hotspot_temp > 0:
+                    self.stats["gpu_hotspot"] = round(hotspot_temp, 1)
+                if gpu_load >= 0 and (b is not None or effective_gpu_temp > 0):
                     self.stats["gpu_load"] = round(gpu_load, 1)
                 if gpu_pwr > 0:
                     self.stats["gpu_power"] = round(gpu_pwr, 1)
@@ -466,3 +556,9 @@ class MonitorCore:
             except Exception:
                 pass
             self.hid_handle = None
+        if self.lhm_comp:
+            try:
+                self.lhm_comp.Close()
+            except Exception:
+                pass
+            self.lhm_comp = None

@@ -1,12 +1,18 @@
 # -*- mode: python ; coding: utf-8 -*-
+from PyInstaller.utils.hooks import collect_all
 
+datas_pn, binaries_pn, hiddenimports_pn = collect_all('pythonnet')
+
+datas = [('ui', 'ui'), ('app.ico', '.'), ('OpenHardwareMonitorServer.exe', '.'), ('OpenHardwareMonitorServer.exe.config', '.'), ('LibreHardwareMonitorLib.dll', '.')] + datas_pn
+binaries = binaries_pn
+hiddenimports = hiddenimports_pn + ['clr']
 
 a = Analysis(
     ['main.py'],
     pathex=[],
-    binaries=[],
-    datas=[('ui', 'ui'), ('app.ico', '.'), ('OpenHardwareMonitorServer.exe', '.'), ('OpenHardwareMonitorServer.exe.config', '.'), ('LibreHardwareMonitorLib.dll', '.')],
-    hiddenimports=[],
+    binaries=binaries,
+    datas=datas,
+    hiddenimports=hiddenimports,
     hookspath=[],
     hooksconfig={},
     runtime_hooks=[],

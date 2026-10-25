@@ -20,7 +20,7 @@ def _sys_ex(tp, val, tb):
 
 sys.excepthook = _sys_ex
 
-APP_VERSION = "1.0.1 (Build 13)"
+APP_VERSION = "1.1.0 (Build 14)"
 WINDOW_TITLE = f"CPU TEMP Monitor ({APP_VERSION})"
 
 
