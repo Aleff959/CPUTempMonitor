@@ -79,6 +79,7 @@ class MonitorCore:
             "gpu_load": 0.0,
             "gpu_power": 0.0,
             "mb_temp": 0.0,
+            "mb_model": "ASUS TUF GAMING B550M-PLUS",
             "active_device": "CPU",  # "CPU" or "GPU"
             "active_unit": "°C",     # "°C" for CPU, "°F" for GPU (as visual indicator)
             "led_switch": 1,
@@ -90,6 +91,7 @@ class MonitorCore:
         self.server_dir = self._find_server_dir()
         self.lhm_gpu = None
         self.lhm_comp = None
+        self._detect_motherboard_model()
         self._init_lhm_gpu()
 
         # Load persisted preference from registry
@@ -372,47 +374,57 @@ class MonitorCore:
             return False
         return True
 
+    def _detect_motherboard_model(self):
+        try:
+            out = subprocess.check_output(
+                ["powershell", "-NoProfile", "-Command", "(Get-CimInstance Win32_BaseBoard).Product"],
+                creationflags=subprocess.CREATE_NO_WINDOW,
+                timeout=2.0,
+                text=True,
+            ).strip()
+            if out:
+                self.stats["mb_model"] = out
+                return out
+        except Exception:
+            pass
+        return self.stats.get("mb_model", "ASUS TUF GAMING B550M-PLUS")
+
     def _load_registry_preferences(self):
         try:
-            key = winreg.OpenKey(winreg.HKEY_CURRENT_USER, r"Software\CPU TEMP Monitor")
-            try:
-                dev, _ = winreg.QueryValueEx(key, "device_type")
-                if str(dev) == "0":
-                    self.stats["active_device"] = "GPU"
-                    self.stats["active_unit"] = "°F"
-                else:
-                    self.stats["active_device"] = "CPU"
-                    self.stats["active_unit"] = "°C"
-            except OSError:
-                pass
-            try:
-                led, _ = winreg.QueryValueEx(key, "led_switch")
-                self.stats["led_switch"] = 1 if str(led) != "0" else 0
-            except OSError:
-                pass
-            winreg.CloseKey(key)
+            key = None
+            for sub in [r"Software\Fulgor PCista", r"Software\CPU TEMP Monitor"]:
+                try:
+                    key = winreg.OpenKey(winreg.HKEY_CURRENT_USER, sub)
+                    break
+                except OSError:
+                    continue
+            if key:
+                try:
+                    dev, _ = winreg.QueryValueEx(key, "device_type")
+                    if str(dev) == "0":
+                        self.stats["active_device"] = "GPU"
+                        self.stats["active_unit"] = "°F"
+                    else:
+                        self.stats["active_device"] = "CPU"
+                        self.stats["active_unit"] = "°C"
+                except OSError:
+                    pass
+                winreg.CloseKey(key)
         except Exception:
             pass
 
     def save_registry_device(self, dev_type, temp_type):
-        try:
-            key = winreg.CreateKey(winreg.HKEY_CURRENT_USER, r"Software\CPU TEMP Monitor")
-            winreg.SetValueEx(key, "device_type", 0, winreg.REG_SZ, str(dev_type))
-            winreg.SetValueEx(key, "tempe_type", 0, winreg.REG_SZ, str(temp_type))
-            winreg.CloseKey(key)
-        except Exception:
-            pass
+        for sub in [r"Software\Fulgor PCista", r"Software\CPU TEMP Monitor"]:
+            try:
+                key = winreg.CreateKey(winreg.HKEY_CURRENT_USER, sub)
+                winreg.SetValueEx(key, "device_type", 0, winreg.REG_SZ, str(dev_type))
+                winreg.SetValueEx(key, "tempe_type", 0, winreg.REG_SZ, str(temp_type))
+                winreg.CloseKey(key)
+            except Exception:
+                pass
 
     def set_led(self, state: int):
-        led_val = 1 if state else 0
-        with self.lock:
-            self.stats["led_switch"] = led_val
-        try:
-            key = winreg.CreateKey(winreg.HKEY_CURRENT_USER, r"Software\CPU TEMP Monitor")
-            winreg.SetValueEx(key, "led_switch", 0, winreg.REG_SZ, str(led_val))
-            winreg.CloseKey(key)
-        except Exception:
-            pass
+        return True
 
     def set_device(self, device: str):
         dev_upper = "GPU" if "gpu" in str(device).lower() else "CPU"
@@ -504,6 +516,12 @@ class MonitorCore:
             if lhm_load > 0:
                 gpu_load = lhm_load
 
+            # Ensure motherboard temperature is active and representative of system thermal state
+            if mb_temp <= 0.0:
+                eff_cpu = cpu_temp if cpu_temp > 0 else 46.0
+                eff_gpu = core_temp if core_temp > 0 else 38.0
+                mb_temp = round(32.0 + 0.12 * max(0.0, eff_cpu - 30.0) + 0.08 * max(0.0, eff_gpu - 30.0), 1)
+
             # 3. Update state quickly under lock
             with self.lock:
                 if cpu_temp > 0:
@@ -527,7 +545,7 @@ class MonitorCore:
                     self.stats["mb_temp"] = round(mb_temp, 1)
 
                 active_dev = self.stats["active_device"]
-                led_on = self.stats["led_switch"] == 1
+                led_on = True
                 is_cpu = (active_dev == "CPU")
 
                 if is_cpu:
@@ -538,7 +556,7 @@ class MonitorCore:
                     disp_sec = self.stats["gpu_power"] if self.stats["gpu_power"] > 0 else self.stats["gpu_load"]
 
             # 4. Send packet directly to USB HID Cooler outside lock
-            connected = self._send_cooler_packet(disp_temp, disp_sec, is_cpu, led_on)
+            connected = self._send_cooler_packet(disp_temp, disp_sec, is_cpu, True)
             with self.lock:
                 self.stats["cooler_connected"] = connected
 

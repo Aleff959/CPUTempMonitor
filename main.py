@@ -20,8 +20,9 @@ def _sys_ex(tp, val, tb):
 
 sys.excepthook = _sys_ex
 
-APP_VERSION = "1.1.0 (Build 14)"
-WINDOW_TITLE = f"CPU TEMP Monitor ({APP_VERSION})"
+APP_NAME = "Fulgor PCista"
+APP_VERSION = "1.2.0 (Build 15)"
+WINDOW_TITLE = f"{APP_NAME} (v{APP_VERSION})"
 
 
 class Api:
@@ -151,7 +152,7 @@ class WinFormsTrayManager:
             try:
                 logging.info("_init: creating NotifyIcon...")
                 self.notify = WinForms.NotifyIcon()
-                self.notify.Text = "CPU TEMP Monitor"
+                self.notify.Text = f"{APP_NAME} - Monitor Térmico"[:63]
 
                 # Infallible multi-tiered icon discovery
                 ico = None
@@ -181,10 +182,10 @@ class WinFormsTrayManager:
                 logging.info(f"_init: icon assigned: {ico}")
 
                 context_menu = WinForms.ContextMenuStrip()
-                item_open = context_menu.Items.Add("Abrir CPU TEMP Monitor")
-                item_hide = context_menu.Items.Add("Ocultar")
+                item_open = context_menu.Items.Add(f"Abrir {APP_NAME}")
+                item_hide = context_menu.Items.Add("Minimizar para a Bandeja")
                 context_menu.Items.Add("-")
-                item_exit = context_menu.Items.Add("Fechar")
+                item_exit = context_menu.Items.Add(f"Encerrar {APP_NAME}")
 
                 item_open.Click += lambda sender, args: self.show_window()
                 item_hide.Click += lambda sender, args: self.hide_window()
@@ -245,7 +246,7 @@ def main():
         url=f"file:///{html_path.replace(os.sep, '/')}",
         js_api=api,
         width=550,
-        height=640,
+        height=620,
         resizable=False,
         frameless=False,
         hidden=start_hidden,

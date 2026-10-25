@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>CPU TEMP Monitor (1.0.1 - Build 13)</title>
+  <title>Fulgor PCista</title>
   <style>
     :root {
       --md-sys-color-primary: #80d4ff;
@@ -60,23 +60,24 @@
     }
 
     .app-icon {
-      width: 26px;
-      height: 26px;
-      background: linear-gradient(135deg, var(--md-sys-color-primary), #0091ea);
+      width: 28px;
+      height: 28px;
+      background: linear-gradient(135deg, #00b0ff, #0069c0);
       border-radius: 8px;
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 14px;
-      font-weight: 700;
-      color: var(--md-sys-color-on-primary);
-      box-shadow: 0 2px 8px rgba(0, 145, 234, 0.3);
+      font-size: 15px;
+      font-weight: 800;
+      color: #ffffff;
+      box-shadow: 0 2px 8px rgba(0, 176, 255, 0.35);
     }
 
     .app-title {
       font-size: 15px;
-      font-weight: 600;
+      font-weight: 700;
       letter-spacing: 0.3px;
+      color: var(--md-sys-color-on-surface);
     }
 
     .version-tag {
@@ -91,7 +92,7 @@
     .usb-badge {
       font-size: 11px;
       font-weight: 600;
-      padding: 4px 10px;
+      padding: 4px 11px;
       border-radius: 12px;
       background: rgba(76, 175, 80, 0.15);
       color: #81c784;
@@ -101,10 +102,10 @@
     /* Main Container */
     .content {
       flex: 1;
-      padding: 12px 20px 20px 20px;
+      padding: 10px 20px 18px 20px;
       display: flex;
       flex-direction: column;
-      gap: 16px;
+      gap: 12px;
       overflow-y: auto;
     }
 
@@ -112,7 +113,7 @@
     .display-status-banner {
       background: var(--md-sys-color-surface-container);
       border-radius: 16px;
-      padding: 14px 18px;
+      padding: 12px 18px;
       display: flex;
       align-items: center;
       justify-content: space-between;
@@ -135,29 +136,29 @@
     .banner-left {
       display: flex;
       flex-direction: column;
-      gap: 4px;
+      gap: 3px;
     }
 
     .banner-label {
-      font-size: 11px;
+      font-size: 10px;
       text-transform: uppercase;
-      letter-spacing: 0.8px;
+      letter-spacing: 0.9px;
       color: var(--md-sys-color-outline);
-      font-weight: 600;
+      font-weight: 700;
     }
 
     .banner-active-pill {
       display: inline-flex;
       align-items: center;
       gap: 8px;
-      font-size: 16px;
+      font-size: 15px;
       font-weight: 700;
       color: var(--md-sys-color-primary);
     }
 
     .pulse-dot {
-      width: 10px;
-      height: 10px;
+      width: 9px;
+      height: 9px;
       border-radius: 50%;
       background: var(--md-sys-color-primary);
       box-shadow: 0 0 10px var(--md-sys-color-primary);
@@ -173,7 +174,7 @@
     .banner-unit-badge {
       background: var(--md-sys-color-primary-container);
       color: var(--md-sys-color-on-primary-container);
-      font-size: 12px;
+      font-size: 11px;
       padding: 4px 12px;
       border-radius: 20px;
       font-weight: 600;
@@ -183,16 +184,16 @@
     .metrics-grid {
       display: grid;
       grid-template-columns: 1fr 1fr;
-      gap: 16px;
+      gap: 12px;
     }
 
     .metric-card {
       background: var(--md-sys-color-surface-container);
-      border-radius: 22px;
-      padding: 18px;
+      border-radius: 20px;
+      padding: 16px;
       display: flex;
       flex-direction: column;
-      gap: 12px;
+      gap: 10px;
       border: 1px solid rgba(255, 255, 255, 0.05);
       transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
       position: relative;
@@ -216,22 +217,23 @@
     }
 
     .card-title {
-      font-size: 14px;
+      font-size: 13px;
       font-weight: 600;
       color: var(--md-sys-color-on-surface-variant);
       display: flex;
       align-items: center;
-      gap: 8px;
+      gap: 6px;
     }
 
     .live-chip {
-      font-size: 10px;
+      font-size: 9px;
       font-weight: 700;
-      padding: 2px 8px;
+      padding: 2px 7px;
       border-radius: 10px;
       background: var(--md-sys-color-primary);
       color: var(--md-sys-color-on-primary);
       display: none;
+      letter-spacing: 0.3px;
     }
 
     .metric-card.active-target .live-chip {
@@ -242,11 +244,11 @@
       display: flex;
       align-items: baseline;
       gap: 4px;
-      margin: 4px 0;
+      margin: 2px 0;
     }
 
     .temp-val {
-      font-size: 46px;
+      font-size: 42px;
       font-weight: 800;
       letter-spacing: -1px;
       line-height: 1;
@@ -254,15 +256,15 @@
     }
 
     .temp-deg {
-      font-size: 22px;
+      font-size: 20px;
       font-weight: 600;
       color: var(--md-sys-color-outline);
     }
 
     .extra-stats {
       display: flex;
-      gap: 16px;
-      padding-top: 10px;
+      gap: 12px;
+      padding-top: 8px;
       border-top: 1px solid rgba(255, 255, 255, 0.06);
     }
 
@@ -273,24 +275,96 @@
     }
 
     .stat-lbl {
-      font-size: 11px;
+      font-size: 10px;
       color: var(--md-sys-color-outline);
+      text-transform: uppercase;
+      letter-spacing: 0.4px;
     }
 
     .stat-val {
-      font-size: 14px;
+      font-size: 13px;
       font-weight: 600;
       color: var(--md-sys-color-on-surface);
     }
 
-    /* Material You Segmented Controls */
-    .controls-panel {
+    /* Motherboard Dedicated Card (Sistema) */
+    .mb-card {
       background: var(--md-sys-color-surface-container);
-      border-radius: 20px;
-      padding: 16px 20px;
+      border-radius: 18px;
+      padding: 13px 18px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      transition: all 0.25s;
+    }
+
+    .mb-card:hover {
+      background: var(--md-sys-color-surface-container-high);
+    }
+
+    .mb-left {
       display: flex;
       flex-direction: column;
-      gap: 14px;
+      gap: 3px;
+    }
+
+    .mb-title-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .internal-badge {
+      font-size: 9px;
+      font-weight: 700;
+      padding: 2px 8px;
+      border-radius: 10px;
+      background: rgba(255, 255, 255, 0.08);
+      color: var(--md-sys-color-outline);
+      letter-spacing: 0.4px;
+    }
+
+    .mb-model {
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--md-sys-color-on-surface);
+    }
+
+    .mb-status-pill {
+      font-size: 11px;
+      color: #81c784;
+      font-weight: 600;
+    }
+
+    .mb-right {
+      display: flex;
+      align-items: baseline;
+      gap: 3px;
+    }
+
+    .mb-temp-val {
+      font-size: 34px;
+      font-weight: 800;
+      letter-spacing: -0.5px;
+      line-height: 1;
+      font-feature-settings: 'tnum';
+    }
+
+    .mb-temp-deg {
+      font-size: 18px;
+      font-weight: 600;
+      color: var(--md-sys-color-outline);
+    }
+
+    /* Controls Panel */
+    .controls-panel {
+      background: var(--md-sys-color-surface-container);
+      border-radius: 18px;
+      padding: 14px 18px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
       border: 1px solid rgba(255, 255, 255, 0.05);
     }
 
@@ -307,7 +381,7 @@
     }
 
     .control-title {
-      font-size: 14px;
+      font-size: 13px;
       font-weight: 600;
       color: var(--md-sys-color-on-surface);
     }
@@ -321,7 +395,7 @@
       display: inline-flex;
       background: var(--md-sys-color-surface);
       border-radius: 24px;
-      padding: 4px;
+      padding: 3px;
       border: 1px solid rgba(255, 255, 255, 0.08);
       gap: 4px;
     }
@@ -343,85 +417,47 @@
       color: var(--md-sys-color-on-secondary-container);
     }
 
-    /* Switch Component */
-    .switch {
-      position: relative;
-      display: inline-block;
-      width: 44px;
-      height: 24px;
-    }
-
-    .switch input {
-      opacity: 0;
-      width: 0;
-      height: 0;
-    }
-
-    .slider {
-      position: absolute;
-      cursor: pointer;
-      top: 0; left: 0; right: 0; bottom: 0;
-      background-color: var(--md-sys-color-surface);
-      border: 1px solid var(--md-sys-color-outline);
-      transition: .3s;
-      border-radius: 24px;
-    }
-
-    .slider:before {
-      position: absolute;
-      content: "";
-      height: 16px;
-      width: 16px;
-      left: 3px;
-      bottom: 3px;
-      background-color: var(--md-sys-color-outline);
-      transition: .3s;
-      border-radius: 50%;
-    }
-
-    input:checked + .slider {
-      background-color: var(--md-sys-color-primary);
-      border-color: var(--md-sys-color-primary);
-    }
-
-    input:checked + .slider:before {
-      transform: translateX(20px);
-      background-color: var(--md-sys-color-on-primary);
+    .control-note {
+      font-size: 10.5px;
+      color: var(--md-sys-color-outline);
+      line-height: 1.4;
+      padding-top: 4px;
+      border-top: 1px solid rgba(255, 255, 255, 0.05);
     }
   </style>
 </head>
 <body>
   <div class="titlebar">
     <div class="app-branding">
-      <div class="app-icon">❄</div>
-      <div class="app-title">CPU TEMP Monitor</div>
-      <span class="version-tag">v1.1.0 (Build 14)</span>
+      <div class="app-icon">⚡</div>
+      <div class="app-title">Fulgor PCista</div>
+      <span class="version-tag">v1.2.0 (Build 15)</span>
     </div>
-    <div class="usb-badge" id="usbStatusBadge">Cooler USB Conectado</div>
+    <div class="usb-badge" id="usbStatusBadge">● Visor Digital Conectado</div>
   </div>
 
   <div class="content">
     <!-- Live Display Banner -->
     <div class="display-status-banner">
       <div class="banner-left">
-        <span class="banner-label">Exibição Fixada no Cooler</span>
+        <span class="banner-label">Dispositivo Vinculado ao Visor Digital</span>
         <div class="banner-active-pill">
           <div class="pulse-dot" id="pulseDot"></div>
-          <span id="bannerActiveDevice">CPU (Processador)</span>
+          <span id="bannerActiveDevice">Processador (CPU)</span>
         </div>
       </div>
-      <div class="banner-unit-badge" id="bannerUnitBadge">Marcador Telinha: °C</div>
+      <div class="banner-unit-badge" id="bannerUnitBadge">Marcador do Visor: °C</div>
     </div>
 
-    <!-- Cards Grid -->
+    <!-- Primary Metrics Grid (CPU & GPU) -->
     <div class="metrics-grid">
       <!-- CPU Card -->
-      <div class="metric-card active-target" id="cardCpu" onclick="setDevice('CPU')" title="Clique para fixar exibição na CPU">
+      <div class="metric-card active-target" id="cardCpu" onclick="setDevice('CPU')" title="Clique para sincronizar o visor digital com o Processador">
         <div class="card-header">
           <div class="card-title">
-            <span>💻 CPU</span>
+            <span>💻 Processador (CPU)</span>
           </div>
-          <span class="live-chip" id="chipCpu">DISPLAY ATIVO</span>
+          <span class="live-chip" id="chipCpu">VISOR ATIVO</span>
         </div>
         <div class="temp-large-display">
           <span class="temp-val" id="valCpuTemp">--</span>
@@ -429,23 +465,23 @@
         </div>
         <div class="extra-stats">
           <div class="stat-item">
-            <span class="stat-lbl">Uso</span>
+            <span class="stat-lbl">Carga</span>
             <span class="stat-val" id="valCpuLoad">--%</span>
           </div>
           <div class="stat-item">
-            <span class="stat-lbl">Potência</span>
+            <span class="stat-lbl">Consumo</span>
             <span class="stat-val" id="valCpuPower">-- W</span>
           </div>
         </div>
       </div>
 
       <!-- GPU Card -->
-      <div class="metric-card" id="cardGpu" onclick="setDevice('GPU')" title="Clique para fixar exibição na GPU">
+      <div class="metric-card" id="cardGpu" onclick="setDevice('GPU')" title="Clique para sincronizar o visor digital com a Placa de Vídeo">
         <div class="card-header">
           <div class="card-title">
-            <span>🎮 GPU (HOT SPOT)</span>
+            <span>🎮 GPU (Hot Spot)</span>
           </div>
-          <span class="live-chip" id="chipGpu">DISPLAY ATIVO</span>
+          <span class="live-chip" id="chipGpu">VISOR ATIVO</span>
         </div>
         <div class="temp-large-display">
           <span class="temp-val" id="valGpuTemp">--</span>
@@ -457,50 +493,47 @@
             <span class="stat-val" id="valGpuCore">-- °C</span>
           </div>
           <div class="stat-item">
-            <span class="stat-lbl">Uso</span>
+            <span class="stat-lbl">Carga</span>
             <span class="stat-val" id="valGpuLoad">--%</span>
           </div>
           <div class="stat-item">
-            <span class="stat-lbl">Potência</span>
+            <span class="stat-lbl">Consumo</span>
             <span class="stat-val" id="valGpuPower">-- W</span>
           </div>
         </div>
       </div>
     </div>
 
-    <!-- Controls Panel -->
+    <!-- Motherboard Telemetry Card (Exclusivo no App) -->
+    <div class="mb-card" id="cardMb">
+      <div class="mb-left">
+        <div class="mb-title-row">
+          <span class="card-title">🎛️ Placa-Mãe (Sistema & Chipset)</span>
+          <span class="internal-badge">EXCLUSIVO NO APP</span>
+        </div>
+        <div class="mb-model" id="valMbModel">ASUS TUF GAMING B550M-PLUS</div>
+        <div class="mb-status-pill">● Operação Estável • VRM Térmico Ativo</div>
+      </div>
+      <div class="mb-right">
+        <span class="mb-temp-val" id="valMbTemp">--</span>
+        <span class="mb-temp-deg">°C</span>
+      </div>
+    </div>
+
+    <!-- Controls Panel (Transmissão Térmica para o Visor) -->
     <div class="controls-panel">
-      <!-- Device Selection: CPU vs GPU -->
       <div class="control-row">
         <div class="control-label-group">
-          <span class="control-title">Dispositivo no Cooler</span>
-          <span class="control-subtitle">Escolha qual temperatura fixar na telinha</span>
+          <span class="control-title">Transmissão para o Visor Físico</span>
+          <span class="control-subtitle">Escolha qual temperatura enviar em tempo real para o cooler</span>
         </div>
         <div class="segmented-button">
-          <button class="seg-btn active" id="btnCpu" onclick="setDevice('CPU')">💻 CPU (°C)</button>
-          <button class="seg-btn" id="btnGpu" onclick="setDevice('GPU')">🎮 GPU (°F)</button>
+          <button class="seg-btn active" id="btnCpu" onclick="setDevice('CPU')">💻 Processador (°C)</button>
+          <button class="seg-btn" id="btnGpu" onclick="setDevice('GPU')">🎮 Placa de Vídeo (°F)</button>
         </div>
       </div>
-
-      <!-- LED Light Switch -->
-      <div class="control-row">
-        <div class="control-label-group">
-          <span class="control-title">Iluminação da Tela / LED</span>
-          <span class="control-subtitle">Ligar ou desligar tela do cooler</span>
-        </div>
-        <label class="switch">
-          <input type="checkbox" id="chkLed" checked onchange="toggleLed(this.checked)">
-          <span class="slider"></span>
-        </label>
-      </div>
-
-      <!-- Motherboard Stats -->
-      <div class="control-row" style="padding-top: 8px; border-top: 1px solid rgba(255, 255, 255, 0.05);">
-        <div class="control-label-group">
-          <span class="control-title">Placa-mãe</span>
-          <span class="control-subtitle">Temperatura do sistema</span>
-        </div>
-        <span style="font-weight: 700; font-size: 15px; color: var(--md-sys-color-outline);" id="valMbTemp">-- °C</span>
+      <div class="control-note">
+        * Conforme a especificação do controlador USB, a Placa de Vídeo utiliza o marcador luminoso °F para identificação visual instantânea no display.
       </div>
     </div>
   </div>
@@ -519,12 +552,6 @@
       }
     }
 
-    function toggleLed(checked) {
-      if (window.pywebview && window.pywebview.api) {
-        pywebview.api.set_led(checked ? 1 : 0).catch(() => {});
-      }
-    }
-
     function updateUi(data) {
       if (!data) return;
 
@@ -540,22 +567,21 @@
       document.getElementById('valGpuLoad').innerText = (data.gpu_load !== undefined ? data.gpu_load : '--') + '%';
       document.getElementById('valGpuPower').innerText = (data.gpu_power && data.gpu_power > 0 ? data.gpu_power : '--') + ' W';
 
-      document.getElementById('valMbTemp').innerText = (data.mb_temp && data.mb_temp > 0 ? data.mb_temp : '--') + ' °C';
+      document.getElementById('valMbTemp').innerText = (data.mb_temp && data.mb_temp > 0 ? data.mb_temp : '--');
+      if (data.mb_model) {
+        const mbModelEl = document.getElementById('valMbModel');
+        if (mbModelEl) mbModelEl.innerText = data.mb_model;
+      }
 
       const usbBadge = document.getElementById('usbStatusBadge');
       if (data.cooler_connected) {
-        usbBadge.innerText = '● Cooler USB Ativo';
+        usbBadge.innerText = '● Visor Digital Conectado';
         usbBadge.style.background = 'rgba(76, 175, 80, 0.15)';
         usbBadge.style.color = '#81c784';
       } else {
-        usbBadge.innerText = '○ Buscando Cooler USB...';
+        usbBadge.innerText = '○ Conectando ao Visor...';
         usbBadge.style.background = 'rgba(255, 183, 124, 0.15)';
         usbBadge.style.color = '#ffb77c';
-      }
-
-      const chkLed = document.getElementById('chkLed');
-      if (chkLed && document.activeElement !== chkLed) {
-        chkLed.checked = (data.led_switch === 1);
       }
 
       const isCpu = data.active_device === 'CPU';
@@ -566,14 +592,14 @@
       document.getElementById('cardGpu').classList.toggle('active-target', !isCpu);
 
       if (isCpu) {
-        document.getElementById('bannerActiveDevice').innerText = 'CPU (Processador)';
-        document.getElementById('bannerUnitBadge').innerText = 'Marcador Telinha: °C';
+        document.getElementById('bannerActiveDevice').innerText = 'Processador (CPU)';
+        document.getElementById('bannerUnitBadge').innerText = 'Marcador do Visor: °C';
         document.getElementById('bannerUnitBadge').style.background = '#004d6a';
         document.getElementById('bannerUnitBadge').style.color = '#c4e7ff';
         document.documentElement.style.setProperty('--md-sys-color-primary', '#80d4ff');
       } else {
-        document.getElementById('bannerActiveDevice').innerText = 'GPU (Hot Spot NVAPI)';
-        document.getElementById('bannerUnitBadge').innerText = 'Marcador Telinha: °F';
+        document.getElementById('bannerActiveDevice').innerText = 'Placa de Vídeo (GPU Hot Spot)';
+        document.getElementById('bannerUnitBadge').innerText = 'Marcador do Visor: °F';
         document.getElementById('bannerUnitBadge').style.background = '#4a2800';
         document.getElementById('bannerUnitBadge').style.color = '#ffdcbe';
         document.documentElement.style.setProperty('--md-sys-color-primary', '#ffb77c');
