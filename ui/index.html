@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Fulgor PCista (v1.2.0 - Ororo)</title>
+  <title>Fulgor PCista (v1.3.0 - Ororo)</title>
   <style>
     :root {
       --md-sys-color-primary: #80d4ff;
@@ -184,16 +184,16 @@
     .metrics-grid {
       display: grid;
       grid-template-columns: 1fr 1fr;
-      gap: 12px;
+      gap: 10px;
     }
 
     .metric-card {
       background: var(--md-sys-color-surface-container);
-      border-radius: 20px;
-      padding: 16px;
+      border-radius: 16px;
+      padding: 12px 14px;
       display: flex;
       flex-direction: column;
-      gap: 10px;
+      gap: 6px;
       border: 1px solid rgba(255, 255, 255, 0.05);
       transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
       position: relative;
@@ -217,7 +217,7 @@
     }
 
     .card-title {
-      font-size: 13px;
+      font-size: 12.5px;
       font-weight: 600;
       color: var(--md-sys-color-on-surface-variant);
       display: flex;
@@ -244,19 +244,19 @@
       display: flex;
       align-items: baseline;
       gap: 4px;
-      margin: 2px 0;
+      margin: 1px 0;
     }
 
     .temp-val {
-      font-size: 42px;
+      font-size: 34px;
       font-weight: 800;
-      letter-spacing: -1px;
+      letter-spacing: -0.8px;
       line-height: 1;
       font-feature-settings: 'tnum';
     }
 
     .temp-deg {
-      font-size: 20px;
+      font-size: 18px;
       font-weight: 600;
       color: var(--md-sys-color-outline);
     }
@@ -264,7 +264,7 @@
     .extra-stats {
       display: flex;
       gap: 12px;
-      padding-top: 8px;
+      padding-top: 6px;
       border-top: 1px solid rgba(255, 255, 255, 0.06);
     }
 
@@ -705,7 +705,7 @@
     <div class="app-branding">
       <div class="app-icon">⚡</div>
       <div class="app-title">Fulgor PCista</div>
-      <span class="version-tag">v1.2.0 | Comp. 15</span>
+      <span class="version-tag">v1.3.0 | Comp. 16</span>
     </div>
     <div class="usb-badge" id="usbStatusBadge">● Visor Digital Conectado</div>
   </div>
@@ -723,7 +723,7 @@
       <div class="banner-unit-badge" id="bannerUnitBadge">Marcador do Visor: °C</div>
     </div>
 
-    <!-- Primary Metrics Grid (CPU & GPU) -->
+    <!-- 2x2 Primary Metrics Grid (CPU, GPU, FPS & VRAM, Placa-Mãe) -->
     <div class="metrics-grid">
       <!-- CPU Card -->
       <div class="metric-card active-target" id="cardCpu" onclick="setDevice('CPU')" title="Clique para sincronizar o visor digital com o Processador">
@@ -776,38 +776,71 @@
           </div>
         </div>
       </div>
-    </div>
 
-    <!-- Motherboard Telemetry Card (Exclusivo no App) -->
-    <div class="mb-card" id="cardMb">
-      <div class="mb-left">
-        <div class="mb-title-row">
-          <span class="card-title">🎛️ Placa-Mãe (Sistema & Chipset)</span>
-          <span class="internal-badge">EXCLUSIVO NO APP</span>
+      <!-- FPS & VRAM Card -->
+      <div class="metric-card" id="cardFps" onclick="setDevice('FPS')" title="Clique para sincronizar o visor digital com a Taxa de Quadros (FPS) e consumo de VRAM">
+        <div class="card-header">
+          <div class="card-title">
+            <span>🎯 FPS & VRAM</span>
+          </div>
+          <span class="live-chip" id="chipFps">VISOR ATIVO</span>
         </div>
-        <div class="mb-model" id="valMbModel">ASUS TUF GAMING B550M-PLUS</div>
-        <div class="mb-status-pill">● Operação Estável • VRM Térmico Ativo</div>
+        <div class="temp-large-display">
+          <span class="temp-val" id="valFps">0</span>
+          <span class="temp-deg" style="color: var(--md-sys-color-primary);">FPS</span>
+        </div>
+        <div class="extra-stats">
+          <div class="stat-item">
+            <span class="stat-lbl">Uso VRAM</span>
+            <span class="stat-val" id="valVramLoad">--%</span>
+          </div>
+          <div class="stat-item">
+            <span class="stat-lbl">Memória</span>
+            <span class="stat-val" id="valVramMem">-- GB</span>
+          </div>
+        </div>
       </div>
-      <div class="mb-right">
-        <span class="mb-temp-val" id="valMbTemp">--</span>
-        <span class="mb-temp-deg">°C</span>
+
+      <!-- Motherboard Dedicated Card (Sistema) -->
+      <div class="metric-card" id="cardMb" style="cursor: default;" title="Telemetria de sistema da Placa-Mãe">
+        <div class="card-header">
+          <div class="card-title">
+            <span>🎛️ Placa-Mãe (VRM)</span>
+          </div>
+          <span class="internal-badge">SISTEMA</span>
+        </div>
+        <div class="temp-large-display">
+          <span class="temp-val" id="valMbTemp">--</span>
+          <span class="temp-deg">°C</span>
+        </div>
+        <div class="extra-stats">
+          <div class="stat-item">
+            <span class="stat-lbl">Modelo</span>
+            <span class="stat-val" id="valMbModel" style="max-width: 140px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">TUF B550M</span>
+          </div>
+          <div class="stat-item">
+            <span class="stat-lbl">Status</span>
+            <span class="stat-val" style="color: #81c784;">Estável</span>
+          </div>
+        </div>
       </div>
     </div>
 
-    <!-- Controls Panel (Transmissão Térmica para o Visor) -->
+    <!-- Controls Panel (Transmissão para o Visor Físico) -->
     <div class="controls-panel">
       <div class="control-row">
         <div class="control-label-group">
           <span class="control-title">Transmissão para o Visor Físico</span>
-          <span class="control-subtitle">Escolha qual temperatura enviar em tempo real para o cooler</span>
+          <span class="control-subtitle">Escolha qual métrica enviar em tempo real para o cooler</span>
         </div>
         <div class="segmented-button">
           <button class="seg-btn active" id="btnCpu" onclick="setDevice('CPU')">💻 Processador (°C)</button>
           <button class="seg-btn" id="btnGpu" onclick="setDevice('GPU')">🎮 Placa de Vídeo (°F)</button>
+          <button class="seg-btn" id="btnFps" onclick="setDevice('FPS')">🎯 FPS & VRAM (F° / %)</button>
         </div>
       </div>
       <div class="control-note">
-        * Conforme a especificação do controlador USB, a Placa de Vídeo utiliza o marcador luminoso °F para identificação visual instantânea no display.
+        * No modo FPS & VRAM, o cooler exibe o FPS no visor principal com o marcador luminoso °F (p°) e a porcentagem de uso de VRAM no visor secundário (%).
       </div>
     </div>
 
@@ -827,7 +860,7 @@
           <div class="modal-icon">⚡</div>
           <div>
             <div class="modal-title">Fulgor PCista</div>
-            <div class="modal-subtitle">v1.2.0 (Ororo) • Comp. 15</div>
+            <div class="modal-subtitle">v1.3.0 (Ororo) • Comp. 16</div>
           </div>
         </div>
         <button class="modal-close-btn" onclick="closeAboutModal()" title="Fechar">✕</button>
@@ -891,11 +924,14 @@
     let currentDevice = 'CPU';
 
     function setDevice(device) {
-      currentDevice = (device === 'GPU') ? 'GPU' : 'CPU';
+      const dev = (device === 'FPS' || device === 'GPU') ? device : 'CPU';
+      currentDevice = dev;
       document.getElementById('btnCpu').classList.toggle('active', currentDevice === 'CPU');
       document.getElementById('btnGpu').classList.toggle('active', currentDevice === 'GPU');
+      document.getElementById('btnFps').classList.toggle('active', currentDevice === 'FPS');
       document.getElementById('cardCpu').classList.toggle('active-target', currentDevice === 'CPU');
       document.getElementById('cardGpu').classList.toggle('active-target', currentDevice === 'GPU');
+      document.getElementById('cardFps').classList.toggle('active-target', currentDevice === 'FPS');
       if (window.pywebview && window.pywebview.api) {
         pywebview.api.set_mode(currentDevice).catch(() => {});
       }
@@ -937,6 +973,14 @@
       document.getElementById('valGpuLoad').innerText = (data.gpu_load !== undefined ? data.gpu_load : '--') + '%';
       document.getElementById('valGpuPower').innerText = (data.gpu_power && data.gpu_power > 0 ? data.gpu_power : '--') + ' W';
 
+      document.getElementById('valFps').innerText = (data.fps !== undefined) ? data.fps : 0;
+      document.getElementById('valVramLoad').innerText = (data.gpu_vram_load !== undefined ? data.gpu_vram_load : '--') + '%';
+      if (data.gpu_vram_used && data.gpu_vram_total) {
+        document.getElementById('valVramMem').innerText = (data.gpu_vram_used / 1024).toFixed(1) + ' / ' + (data.gpu_vram_total / 1024).toFixed(1) + ' GB';
+      } else {
+        document.getElementById('valVramMem').innerText = '-- GB';
+      }
+
       document.getElementById('valMbTemp').innerText = (data.mb_temp && data.mb_temp > 0 ? data.mb_temp : '--');
       if (data.mb_model) {
         const mbModelEl = document.getElementById('valMbModel');
@@ -954,25 +998,33 @@
         usbBadge.style.color = '#ffb77c';
       }
 
-      const isCpu = data.active_device === 'CPU';
-      currentDevice = data.active_device || 'CPU';
-      document.getElementById('btnCpu').classList.toggle('active', isCpu);
-      document.getElementById('btnGpu').classList.toggle('active', !isCpu);
-      document.getElementById('cardCpu').classList.toggle('active-target', isCpu);
-      document.getElementById('cardGpu').classList.toggle('active-target', !isCpu);
+      const active = data.active_device || 'CPU';
+      currentDevice = active;
+      document.getElementById('btnCpu').classList.toggle('active', active === 'CPU');
+      document.getElementById('btnGpu').classList.toggle('active', active === 'GPU');
+      document.getElementById('btnFps').classList.toggle('active', active === 'FPS');
+      document.getElementById('cardCpu').classList.toggle('active-target', active === 'CPU');
+      document.getElementById('cardGpu').classList.toggle('active-target', active === 'GPU');
+      document.getElementById('cardFps').classList.toggle('active-target', active === 'FPS');
 
-      if (isCpu) {
+      if (active === 'CPU') {
         document.getElementById('bannerActiveDevice').innerText = 'Processador (CPU)';
         document.getElementById('bannerUnitBadge').innerText = 'Marcador do Visor: °C';
         document.getElementById('bannerUnitBadge').style.background = '#004d6a';
         document.getElementById('bannerUnitBadge').style.color = '#c4e7ff';
         document.documentElement.style.setProperty('--md-sys-color-primary', '#80d4ff');
-      } else {
+      } else if (active === 'GPU') {
         document.getElementById('bannerActiveDevice').innerText = 'Placa de Vídeo (GPU Hot Spot)';
         document.getElementById('bannerUnitBadge').innerText = 'Marcador do Visor: °F';
         document.getElementById('bannerUnitBadge').style.background = '#4a2800';
         document.getElementById('bannerUnitBadge').style.color = '#ffdcbe';
         document.documentElement.style.setProperty('--md-sys-color-primary', '#ffb77c');
+      } else { // FPS & VRAM
+        document.getElementById('bannerActiveDevice').innerText = 'Taxa de Quadros & VRAM (FPS / %)';
+        document.getElementById('bannerUnitBadge').innerText = 'Marcador do Visor: °F / %';
+        document.getElementById('bannerUnitBadge').style.background = '#00472e';
+        document.getElementById('bannerUnitBadge').style.color = '#69f0ae';
+        document.documentElement.style.setProperty('--md-sys-color-primary', '#69f0ae');
       }
     }
 

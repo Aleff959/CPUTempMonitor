@@ -21,7 +21,7 @@ def _sys_ex(tp, val, tb):
 sys.excepthook = _sys_ex
 
 APP_NAME = "Fulgor PCista"
-APP_VERSION = "1.2.0"
+APP_VERSION = "1.3.0"
 APP_CODENAME = "Ororo"
 WINDOW_TITLE = f"{APP_NAME} (v{APP_VERSION} - {APP_CODENAME})"
 
@@ -256,7 +256,7 @@ def main():
         url=f"file:///{html_path.replace(os.sep, '/')}",
         js_api=api,
         width=550,
-        height=640,
+        height=660,
         resizable=False,
         frameless=False,
         hidden=start_hidden,

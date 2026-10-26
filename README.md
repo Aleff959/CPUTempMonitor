@@ -1,6 +1,6 @@
-# ⚡ Fulgor PCista (v1.2.0 - Ororo)
+# ⚡ Fulgor PCista (v1.3.0 - Ororo)
 
-[![Versão](https://img.shields.io/badge/vers%C3%A3o-1.2.0--Ororo-00b0ff.svg)](https://github.com/Aleff959/CPUTempMonitor/releases)
+[![Versão](https://img.shields.io/badge/vers%C3%A3o-1.3.0--Ororo-00b0ff.svg)](https://github.com/Aleff959/CPUTempMonitor/releases)
 [![Plataforma](https://img.shields.io/badge/plataforma-Windows%2011%20%7C%2010-0078D6.svg)](https://github.com/Aleff959/CPUTempMonitor)
 [![Licença](https://img.shields.io/badge/licen%C3%A7a-MIT-green.svg)](LICENSE)
 [![Design](https://img.shields.io/badge/estilo-Material%20You%20Dark-111418.svg)](https://github.com/Aleff959/CPUTempMonitor)
@@ -13,13 +13,15 @@ Substitui totalmente os utilitários proprietários pesados e instáveis (`Devic
 
 ## ✨ Principais Funcionalidades
 
-* **🎨 Interface Material You Moderna:** Visual escuro sofisticado com paleta de cores orgânica, bordas arredondadas e integração imersiva com a barra de título nativa do Windows 11.
+* **🎨 Interface Material You Moderna:** Visual escuro sofisticado com paleta de cores orgânica, grade balanceada 2x2, bordas arredondadas e integração imersiva com a barra de título nativa do Windows 11.
 * **❄️ Controle Nativo USB HID:** Comunicação direta com microcontroladores de cooler digital (`VID 1A2C & PID 4984`, interface HID vendor-defined).
 * **🔥 Monitoramento de GPU Hot Spot via NVAPI:** Leitura do ponto térmico mais crítico do silício de placas de vídeo NVIDIA através de integração de baixo nível, superando as limitações do `nvidia-smi` tradicional.
+* **🎯 Taxa de Quadros (FPS) e Consumo de VRAM em Tempo Real:** Motor híbrido de alta fidelidade integrando memória compartilhada do RivaTuner Statistics Server (RTSS) e rastreamento ETW via PresentMon, exibindo a taxa de quadros e o percentual de consumo da memória de vídeo.
 * **🎛️ Telemetria Dedicada da Placa-Mãe:** Acompanhamento térmico do barramento do sistema, chipset e circuitos de alimentação (VRM) exclusivo na tela do aplicativo, mantendo o display do cooler focado nos alvos principais de resfriamento.
 * **🔒 Seleção Dinâmica para o Visor Físico:**
   * **Modo Processador (CPU):** Envia a temperatura da CPU acompanhada do indicador fixo `°C` e da carga de trabalho (`%`).
   * **Modo Placa de Vídeo (GPU):** Envia a temperatura de Hot Spot da GPU com o marcador `°F` (usado por especificação de hardware para rápida identificação visual) e o consumo elétrico real em `Watts`.
+  * **Modo FPS & VRAM:** Envia a taxa de quadros em tempo real (`FPS`) com o marcador luminoso `°F` (`p°`) no display principal e o percentual de uso de `VRAM` (`%`) no display secundário.
 * **🔔 Integração Completa com a Bandeja do Sistema (System Tray):**
   * Inicialização silenciosa opcional em segundo plano através do parâmetro `-hide`.
   * Menu de contexto comercial em português para restauração, ocultação e encerramento limpo da aplicação.

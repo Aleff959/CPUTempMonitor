@@ -63,6 +63,173 @@ FILE_MAP_READ = 0x0004
 INVALID_HANDLE_VALUE = ctypes.c_void_p(-1).value
 
 
+class RTSSReader:
+    """Reads real-time instantaneous framerate directly from RivaTuner Statistics Server shared memory."""
+    def __init__(self):
+        self.last_check_launch = 0.0
+        self.rtss_path = r"C:\Program Files (x86)\RivaTuner Statistics Server\RTSS.exe"
+        self.has_rtss_installed = os.path.exists(self.rtss_path)
+        self.last_times = {}
+
+    def try_launch_rtss(self):
+        now = time.time()
+        if not self.has_rtss_installed or (now - self.last_check_launch < 45.0):
+            return
+        self.last_check_launch = now
+        for p in psutil.process_iter(["name"]):
+            try:
+                if (p.info["name"] or "").lower() == "rtss.exe":
+                    return
+            except Exception:
+                pass
+        try:
+            subprocess.Popen([self.rtss_path], creationflags=subprocess.CREATE_NO_WINDOW)
+        except Exception:
+            pass
+
+    def read_fps(self):
+        h_map = kernel32.OpenFileMappingW(FILE_MAP_READ, False, "RTSSSharedMemoryV2")
+        if not h_map:
+            self.try_launch_rtss()
+            return 0.0
+        try:
+            p_mem = kernel32.MapViewOfFile(h_map, FILE_MAP_READ, 0, 0, 0)
+            if not p_mem:
+                return 0.0
+            try:
+                raw_header = ctypes.string_at(p_mem, 64)
+                dw_sig, dw_ver, dw_app_entry_size, dw_app_arr_offset, dw_app_arr_size = struct.unpack_from("<5I", raw_header, 0)
+                if dw_sig != 0x53535452 or dw_ver < 0x00020000:
+                    return 0.0
+
+                now = time.time()
+                best_fps = 0.0
+
+                for i in range(min(dw_app_arr_size, 32)):
+                    entry_off = dw_app_arr_offset + i * dw_app_entry_size
+                    entry_raw = ctypes.string_at(p_mem + entry_off, min(dw_app_entry_size, 512))
+                    pid = struct.unpack_from("<I", entry_raw, 0)[0]
+                    if pid == 0:
+                        continue
+
+                    name_bytes = entry_raw[4:264].split(b'\x00')[0]
+                    app_name = name_bytes.decode('latin1', errors='ignore').lower()
+                    if "fulgor" in app_name or "openhardware" in app_name:
+                        continue
+
+                    flags, t0, t1, frames, frametime = struct.unpack_from("<5I", entry_raw, 264)
+
+                    prev = self.last_times.get(pid)
+                    if prev:
+                        prev_t1, prev_frames, prev_update = prev
+                        if t1 != prev_t1 or frames != prev_frames:
+                            self.last_times[pid] = (t1, frames, now)
+                        else:
+                            if now - prev_update > 2.0:
+                                continue
+                    else:
+                        self.last_times[pid] = (t1, frames, now)
+
+                    fps = 0.0
+                    if t1 > t0:
+                        fps = 1000.0 * frames / (t1 - t0)
+                    elif frametime > 0:
+                        fps = 1000000.0 / frametime
+
+                    if fps > 0:
+                        best_fps = max(best_fps, fps)
+
+                return round(best_fps, 0)
+            finally:
+                kernel32.UnmapViewOfFile(p_mem)
+        finally:
+            kernel32.CloseHandle(h_map)
+
+
+class PresentMonReader:
+    """Fallback ETW-based framerate reader utilizing PresentMon."""
+    def __init__(self):
+        self.proc = None
+        self.thread = None
+        self.running = False
+        self.lock = threading.Lock()
+        self.recent_presents = []
+        self.exe_path = self._find_presentmon()
+
+    def _find_presentmon(self):
+        cands = [
+            r"C:\Program Files\NVIDIA Corporation\FrameViewSDK\bin\PresentMon_x64.exe",
+            r"C:\Program Files (x86)\RivaTuner Statistics Server\Plugins\Client\PresentMonDataProvider\PresentMon-2.3.1-x64-DLSS4.exe",
+            r"C:\Program Files (x86)\RivaTuner Statistics Server\Plugins\Client\PresentMonDataProvider\PresentMon-2.3.1-x64.exe",
+        ]
+        for c in cands:
+            if os.path.exists(c):
+                return c
+        return None
+
+    def start(self):
+        if not self.exe_path or self.running:
+            return
+        self.running = True
+        self.thread = threading.Thread(target=self._run, daemon=True)
+        self.thread.start()
+
+    def _run(self):
+        try:
+            cmd = [
+                self.exe_path,
+                "--output_stdout",
+                "--no_csv",
+                "--exclude", "FulgorPCista.exe",
+                "--exclude", "OpenHardwareMonitorServer.exe",
+                "--exclude", "dwm.exe",
+            ]
+            self.proc = subprocess.Popen(
+                cmd,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.DEVNULL,
+                text=True,
+                bufsize=1,
+                creationflags=subprocess.CREATE_NO_WINDOW
+            )
+            for line in iter(self.proc.stdout.readline, ''):
+                if not self.running:
+                    break
+                line = line.strip()
+                if not line or line.startswith("Application,") or line.startswith("PresentMon"):
+                    continue
+                now = time.time()
+                with self.lock:
+                    self.recent_presents.append(now)
+                    cutoff = now - 1.2
+                    while self.recent_presents and self.recent_presents[0] < cutoff:
+                        self.recent_presents.pop(0)
+        except Exception:
+            pass
+        finally:
+            self.running = False
+
+    def get_fps(self):
+        now = time.time()
+        with self.lock:
+            cutoff = now - 1.2
+            while self.recent_presents and self.recent_presents[0] < cutoff:
+                self.recent_presents.pop(0)
+            count = len(self.recent_presents)
+            if count == 0:
+                return 0.0
+            return round(count / 1.2, 0)
+
+    def stop(self):
+        self.running = False
+        if self.proc:
+            try:
+                self.proc.terminate()
+            except Exception:
+                pass
+            self.proc = None
+
+
 class MonitorCore:
     def __init__(self):
         self.running = True
@@ -78,10 +245,14 @@ class MonitorCore:
             "gpu_hotspot": 0.0,      # Explicit Hot Spot temperature
             "gpu_load": 0.0,
             "gpu_power": 0.0,
+            "gpu_vram_load": 0.0,    # VRAM usage percentage
+            "gpu_vram_used": 0.0,    # VRAM used in MB
+            "gpu_vram_total": 0.0,   # VRAM total in MB
+            "fps": 0,                # Real-time frames per second
             "mb_temp": 0.0,
             "mb_model": "ASUS TUF GAMING B550M-PLUS",
-            "active_device": "CPU",  # "CPU" or "GPU"
-            "active_unit": "°C",     # "°C" for CPU, "°F" for GPU (as visual indicator)
+            "active_device": "CPU",  # "CPU", "GPU", or "FPS"
+            "active_unit": "°C",     # "°C" for CPU, "°F" for GPU / FPS
             "led_switch": 1,
             "cooler_connected": False,
         }
@@ -91,6 +262,10 @@ class MonitorCore:
         self.server_dir = self._find_server_dir()
         self.lhm_gpu = None
         self.lhm_comp = None
+        self.rtss_reader = RTSSReader()
+        self.pmon_reader = PresentMonReader()
+        self.pmon_reader.start()
+
         self._detect_motherboard_model()
         self._init_lhm_gpu()
 
@@ -261,10 +436,10 @@ class MonitorCore:
             kernel32.CloseHandle(h_map)
 
     def _read_nvidia_fallback(self):
-        """Fast fallback for NVIDIA GPU metrics while server initializes."""
+        """Fast fallback for NVIDIA GPU metrics and VRAM while server initializes."""
         try:
             out = subprocess.check_output(
-                ["nvidia-smi", "--query-gpu=temperature.gpu,utilization.gpu,power.draw", "--format=csv,noheader,nounits"],
+                ["nvidia-smi", "--query-gpu=temperature.gpu,utilization.gpu,power.draw,memory.used,memory.total", "--format=csv,noheader,nounits"],
                 creationflags=subprocess.CREATE_NO_WINDOW,
                 timeout=1.5,
                 text=True,
@@ -272,7 +447,13 @@ class MonitorCore:
             if out:
                 parts = [p.strip() for p in out.splitlines()[0].split(",")]
                 if len(parts) >= 3:
-                    return float(parts[0]), float(parts[1]), float(parts[2])
+                    temp = float(parts[0])
+                    load = float(parts[1])
+                    pwr = float(parts[2])
+                    used_mb = float(parts[3]) if len(parts) >= 4 else 0.0
+                    total_mb = float(parts[4]) if len(parts) >= 5 else 0.0
+                    vram_load = round((used_mb / total_mb) * 100.0, 1) if total_mb > 0 else 0.0
+                    return temp, load, pwr, vram_load, used_mb, total_mb
         except Exception:
             pass
         return None
@@ -401,7 +582,10 @@ class MonitorCore:
             if key:
                 try:
                     dev, _ = winreg.QueryValueEx(key, "device_type")
-                    if str(dev) == "0":
+                    if str(dev) == "2":
+                        self.stats["active_device"] = "FPS"
+                        self.stats["active_unit"] = "°F"
+                    elif str(dev) == "0":
                         self.stats["active_device"] = "GPU"
                         self.stats["active_unit"] = "°F"
                     else:
@@ -427,12 +611,26 @@ class MonitorCore:
         return True
 
     def set_device(self, device: str):
-        dev_upper = "GPU" if "gpu" in str(device).lower() else "CPU"
+        dev = str(device).upper()
+        if "FPS" in dev or "VRAM" in dev:
+            dev_upper = "FPS"
+            dev_unit = "°F"
+            dev_val = 2
+            temp_val = 2
+        elif "GPU" in dev:
+            dev_upper = "GPU"
+            dev_unit = "°F"
+            dev_val = 0
+            temp_val = 1
+        else:
+            dev_upper = "CPU"
+            dev_unit = "°C"
+            dev_val = 1
+            temp_val = 0
+
         with self.lock:
             self.stats["active_device"] = dev_upper
-            self.stats["active_unit"] = "°C" if dev_upper == "CPU" else "°F"
-            dev_val = 1 if dev_upper == "CPU" else 0
-            temp_val = 0 if dev_upper == "CPU" else 1
+            self.stats["active_unit"] = dev_unit
 
         self.save_registry_device(dev_val, temp_val)
         return True
@@ -467,11 +665,15 @@ class MonitorCore:
                 except Exception:
                     pass
 
-            # 2. Direct NVAPI Hot Spot & GPU telemetry from LibreHardwareMonitor
+            # 2. Direct NVAPI Hot Spot, GPU & VRAM telemetry from LibreHardwareMonitor
             lhm_hotspot = 0.0
             lhm_core = 0.0
             lhm_pwr = 0.0
             lhm_load = 0.0
+            lhm_vram_load = 0.0
+            lhm_vram_used = 0.0
+            lhm_vram_total = 0.0
+
             if self.lhm_gpu:
                 try:
                     self.lhm_gpu.Update()
@@ -488,11 +690,22 @@ class MonitorCore:
                         elif "power" in stype and ("package" in sname or "gpu" in sname or "core" in sname or "power" in sname):
                             if val > lhm_pwr:
                                 lhm_pwr = val
-                        elif "load" in stype and ("core" in sname or "gpu" in sname):
-                            if val > lhm_load:
-                                lhm_load = val
+                        elif "load" in stype:
+                            if (sname == "gpu memory" or sname == "memory") and lhm_vram_load == 0.0:
+                                lhm_vram_load = val
+                            elif ("core" in sname or "gpu" in sname) and "controller" not in sname and "bus" not in sname and "video" not in sname:
+                                if val > lhm_load:
+                                    lhm_load = val
+                        elif "smalldata" in stype:
+                            if "memory used" in sname and "dedicated" not in sname:
+                                lhm_vram_used = val
+                            elif "memory total" in sname:
+                                lhm_vram_total = val
                 except Exception:
                     pass
+
+            if lhm_vram_used > 0 and lhm_vram_total > 0:
+                lhm_vram_load = round((lhm_vram_used / lhm_vram_total) * 100.0, 1)
 
             # Fallbacks if shared memory is still warming up or missing sensors
             if cpu_load <= 0.0:
@@ -501,11 +714,12 @@ class MonitorCore:
                 except Exception:
                     pass
 
-            if (gpu_temp <= 0.0 and lhm_core <= 0.0) and (now - last_nvidia_check >= 2.0):
+            nv_vram_load = nv_vram_used = nv_vram_total = 0.0
+            if (gpu_temp <= 0.0 and lhm_core <= 0.0 or lhm_vram_load <= 0.0) and (now - last_nvidia_check >= 2.0):
                 last_nvidia_check = now
                 nv = self._read_nvidia_fallback()
                 if nv:
-                    gpu_temp, gpu_load, gpu_pwr = nv
+                    gpu_temp, gpu_load, gpu_pwr, nv_vram_load, nv_vram_used, nv_vram_total = nv
 
             # Prefer direct NVAPI metrics when available
             core_temp = lhm_core if lhm_core > 0 else gpu_temp
@@ -515,6 +729,15 @@ class MonitorCore:
                 gpu_pwr = lhm_pwr
             if lhm_load > 0:
                 gpu_load = lhm_load
+
+            final_vram_load = lhm_vram_load if lhm_vram_load > 0 else nv_vram_load
+            final_vram_used = lhm_vram_used if lhm_vram_used > 0 else nv_vram_used
+            final_vram_total = lhm_vram_total if lhm_vram_total > 0 else nv_vram_total
+
+            # Read FPS from RTSS or PresentMon
+            cur_fps = self.rtss_reader.read_fps()
+            if cur_fps <= 0.0:
+                cur_fps = self.pmon_reader.get_fps()
 
             # Ensure motherboard temperature is active and representative of system thermal state
             if mb_temp <= 0.0:
@@ -541,19 +764,36 @@ class MonitorCore:
                     self.stats["gpu_load"] = round(gpu_load, 1)
                 if gpu_pwr > 0:
                     self.stats["gpu_power"] = round(gpu_pwr, 1)
+
+                if final_vram_load > 0:
+                    self.stats["gpu_vram_load"] = round(final_vram_load, 1)
+                if final_vram_used > 0:
+                    self.stats["gpu_vram_used"] = round(final_vram_used, 0)
+                if final_vram_total > 0:
+                    self.stats["gpu_vram_total"] = round(final_vram_total, 0)
+
+                self.stats["fps"] = int(round(cur_fps))
+
                 if mb_temp > 0:
                     self.stats["mb_temp"] = round(mb_temp, 1)
 
                 active_dev = self.stats["active_device"]
                 led_on = True
-                is_cpu = (active_dev == "CPU")
 
-                if is_cpu:
-                    disp_temp = self.stats["cpu_temp"]
-                    disp_sec = self.stats["cpu_load"]
-                else:
-                    disp_temp = self.stats["gpu_temp"]
-                    disp_sec = self.stats["gpu_power"] if self.stats["gpu_power"] > 0 else self.stats["gpu_load"]
+                if active_dev == "FPS":
+                    # Main display: FPS with 0x01 (°F / p° indicator)
+                    # Secondary display: VRAM % with 0-100 and % glyph
+                    disp_temp = float(self.stats["fps"])
+                    disp_sec = float(self.stats["gpu_vram_load"])
+                    is_cpu = False
+                elif active_dev == "GPU":
+                    disp_temp = float(self.stats["gpu_temp"])
+                    disp_sec = float(self.stats["gpu_power"] if self.stats["gpu_power"] > 0 else self.stats["gpu_load"])
+                    is_cpu = False
+                else:  # CPU
+                    disp_temp = float(self.stats["cpu_temp"])
+                    disp_sec = float(self.stats["cpu_load"])
+                    is_cpu = True
 
             # 4. Send packet directly to USB HID Cooler outside lock
             connected = self._send_cooler_packet(disp_temp, disp_sec, is_cpu, True)
@@ -568,6 +808,7 @@ class MonitorCore:
 
     def close(self):
         self.running = False
+        self.pmon_reader.stop()
         if self.hid_handle:
             try:
                 kernel32.CloseHandle(self.hid_handle)
