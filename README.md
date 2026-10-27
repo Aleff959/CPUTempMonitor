@@ -17,6 +17,7 @@ Substitui totalmente os utilitários proprietários pesados e instáveis (`Devic
 * **❄️ Controle Nativo USB HID:** Comunicação direta com microcontroladores de cooler digital (`VID 1A2C & PID 4984`, interface HID vendor-defined).
 * **🔥 Monitoramento de GPU Hot Spot via NVAPI:** Leitura do ponto térmico mais crítico do silício de placas de vídeo NVIDIA através de integração de baixo nível, superando as limitações do `nvidia-smi` tradicional.
 * **🎯 Taxa de Quadros (FPS) e Consumo de VRAM em Tempo Real:** Motor híbrido de alta fidelidade integrando memória compartilhada do RivaTuner Statistics Server (RTSS) e rastreamento ETW via PresentMon, exibindo a taxa de quadros e o percentual de consumo da memória de vídeo.
+* **🕹️ Troca Automática Inteligente para Jogos:** Detecção em tempo real de renderização 3D e processos de jogos em execução. O aplicativo comuta o display do cooler para o modo FPS & VRAM automaticamente ao entrar em qualquer jogo e restaura a visualização anterior (CPU ou GPU) logo após sair.
 * **🎛️ Telemetria Dedicada da Placa-Mãe:** Acompanhamento térmico do barramento do sistema, chipset e circuitos de alimentação (VRM) exclusivo na tela do aplicativo, mantendo o display do cooler focado nos alvos principais de resfriamento.
 * **🔒 Seleção Dinâmica para o Visor Físico:**
   * **Modo Processador (CPU):** Envia a temperatura da CPU acompanhada do indicador fixo `°C` e da carga de trabalho (`%`).

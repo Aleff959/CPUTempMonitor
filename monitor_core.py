@@ -290,7 +290,16 @@ class MonitorCore:
             "active_unit": "°C",     # "°C" for CPU, "°F" for GPU / FPS
             "led_switch": 1,
             "cooler_connected": False,
+            "auto_switch_fps": 1,    # Auto-switch to FPS mode when entering game
+            "in_game": False,        # True when game actively presenting frames
         }
+
+        self.last_user_device = "CPU"
+        self.auto_switched = False
+        self.game_active_samples = 0
+        self.game_idle_samples = 0
+        self._last_proc_scan = 0.0
+        self._last_game_proc_detected = False
 
         self.server_proc = None
         self.hid_handle = None
@@ -630,7 +639,17 @@ class MonitorCore:
                         self.stats["active_unit"] = "°C"
                 except OSError:
                     pass
+
+                try:
+                    auto_sw, _ = winreg.QueryValueEx(key, "auto_switch_fps")
+                    self.stats["auto_switch_fps"] = 1 if str(auto_sw) != "0" else 0
+                except OSError:
+                    self.stats["auto_switch_fps"] = 1
+
                 winreg.CloseKey(key)
+
+            cur_dev = self.stats["active_device"]
+            self.last_user_device = cur_dev if cur_dev in ["CPU", "GPU"] else "CPU"
         except Exception:
             pass
 
@@ -643,6 +662,19 @@ class MonitorCore:
                 winreg.CloseKey(key)
             except Exception:
                 pass
+
+    def set_auto_switch(self, enabled: bool):
+        val = 1 if enabled else 0
+        with self.lock:
+            self.stats["auto_switch_fps"] = val
+        for sub in [r"Software\Fulgor PCista", r"Software\CPU TEMP Monitor"]:
+            try:
+                key = winreg.CreateKey(winreg.HKEY_CURRENT_USER, sub)
+                winreg.SetValueEx(key, "auto_switch_fps", 0, winreg.REG_SZ, str(val))
+                winreg.CloseKey(key)
+            except Exception:
+                pass
+        return True
 
     def set_led(self, state: int):
         return True
@@ -668,6 +700,9 @@ class MonitorCore:
         with self.lock:
             self.stats["active_device"] = dev_upper
             self.stats["active_unit"] = dev_unit
+            if dev_upper in ["CPU", "GPU"]:
+                self.last_user_device = dev_upper
+            self.auto_switched = False
 
         self.save_registry_device(dev_val, temp_val)
         return True
@@ -778,6 +813,29 @@ class MonitorCore:
                     self.pmon_reader.start()
                 cur_fps = self.pmon_reader.get_fps()
 
+            # Automatic Game Detection & Mode Switching
+            is_rendering_fps = (cur_fps > 5.0)
+            is_game_proc = False
+            if now - self._last_proc_scan > 3.0:
+                self._last_proc_scan = now
+                try:
+                    for p in psutil.process_iter(["name"]):
+                        pname = (p.info["name"] or "").lower()
+                        if any(g in pname for g in [
+                            "cyberpunk", "witcher", "gta", "cod", "warzone", "apex",
+                            "valorant", "fortnite", "overwatch", "cs2", "dota",
+                            "rdr2", "starfield", "eldenring", "baldursgate", "forza"
+                        ]):
+                            is_game_proc = True
+                            break
+                    self._last_game_proc_detected = is_game_proc
+                except Exception:
+                    pass
+            else:
+                is_game_proc = self._last_game_proc_detected
+
+            is_in_game = is_rendering_fps or (is_game_proc and cur_fps > 0.0)
+
             # Ensure motherboard temperature is active and representative of system thermal state
             if mb_temp <= 0.0:
                 eff_cpu = cpu_temp if cpu_temp > 0 else 46.0
@@ -786,6 +844,29 @@ class MonitorCore:
 
             # 3. Update state quickly under lock
             with self.lock:
+                auto_on = (self.stats.get("auto_switch_fps", 1) == 1)
+
+                if is_in_game:
+                    self.game_active_samples += 1
+                    self.game_idle_samples = 0
+                    if self.game_active_samples >= 2:
+                        self.stats["in_game"] = True
+                        if auto_on and self.stats["active_device"] != "FPS":
+                            if self.stats["active_device"] in ["CPU", "GPU"]:
+                                self.last_user_device = self.stats["active_device"]
+                            self.stats["active_device"] = "FPS"
+                            self.stats["active_unit"] = "%"
+                            self.auto_switched = True
+                else:
+                    self.game_idle_samples += 1
+                    self.game_active_samples = 0
+                    if self.game_idle_samples >= 4:
+                        self.stats["in_game"] = False
+                        if auto_on and self.auto_switched:
+                            restore_target = self.last_user_device if self.last_user_device in ["CPU", "GPU"] else "CPU"
+                            self.stats["active_device"] = restore_target
+                            self.stats["active_unit"] = "°C" if restore_target == "CPU" else "°F"
+                            self.auto_switched = False
                 if cpu_temp > 0:
                     self.stats["cpu_temp"] = round(cpu_temp, 1)
                 if cpu_load > 0 or self.stats["cpu_load"] == 0:

@@ -41,6 +41,10 @@ class Api:
         self._core.set_led(state)
         return True
 
+    def set_auto_switch(self, enabled):
+        self._core.set_auto_switch(enabled)
+        return True
+
     def open_url(self, url):
         import webbrowser
         try:
@@ -256,7 +260,7 @@ def main():
         url=f"file:///{html_path.replace(os.sep, '/')}",
         js_api=api,
         width=550,
-        height=660,
+        height=695,
         resizable=False,
         frameless=False,
         hidden=start_hidden,
