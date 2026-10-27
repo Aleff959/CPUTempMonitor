@@ -705,7 +705,7 @@
     <div class="app-branding">
       <div class="app-icon">⚡</div>
       <div class="app-title">Fulgor PCista</div>
-      <span class="version-tag">v1.3.0 | Comp. 16</span>
+      <span class="version-tag">v1.3.0 | Comp. 17</span>
     </div>
     <div class="usb-badge" id="usbStatusBadge">● Visor Digital Conectado</div>
   </div>
@@ -836,11 +836,11 @@
         <div class="segmented-button">
           <button class="seg-btn active" id="btnCpu" onclick="setDevice('CPU')">💻 Processador (°C)</button>
           <button class="seg-btn" id="btnGpu" onclick="setDevice('GPU')">🎮 Placa de Vídeo (°F)</button>
-          <button class="seg-btn" id="btnFps" onclick="setDevice('FPS')">🎯 FPS & VRAM (F° / %)</button>
+          <button class="seg-btn" id="btnFps" onclick="setDevice('FPS')">🎯 FPS & VRAM (%)</button>
         </div>
       </div>
       <div class="control-note">
-        * No modo FPS & VRAM, o cooler exibe o FPS no visor principal com o marcador luminoso °F (p°) e a porcentagem de uso de VRAM no visor secundário (%).
+        * No modo FPS & VRAM, o cooler exibe o FPS em tempo real no visor principal e a porcentagem de consumo da VRAM no visor secundário (%).
       </div>
     </div>
 
@@ -860,7 +860,7 @@
           <div class="modal-icon">⚡</div>
           <div>
             <div class="modal-title">Fulgor PCista</div>
-            <div class="modal-subtitle">v1.3.0 (Ororo) • Comp. 16</div>
+            <div class="modal-subtitle">v1.3.0 (Ororo) • Comp. 17</div>
           </div>
         </div>
         <button class="modal-close-btn" onclick="closeAboutModal()" title="Fechar">✕</button>
@@ -1021,7 +1021,7 @@
         document.documentElement.style.setProperty('--md-sys-color-primary', '#ffb77c');
       } else { // FPS & VRAM
         document.getElementById('bannerActiveDevice').innerText = 'Taxa de Quadros & VRAM (FPS / %)';
-        document.getElementById('bannerUnitBadge').innerText = 'Marcador do Visor: °F / %';
+        document.getElementById('bannerUnitBadge').innerText = 'Marcador do Visor: %';
         document.getElementById('bannerUnitBadge').style.background = '#00472e';
         document.getElementById('bannerUnitBadge').style.color = '#69f0ae';
         document.documentElement.style.setProperty('--md-sys-color-primary', '#69f0ae');

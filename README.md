@@ -21,7 +21,7 @@ Substitui totalmente os utilitários proprietários pesados e instáveis (`Devic
 * **🔒 Seleção Dinâmica para o Visor Físico:**
   * **Modo Processador (CPU):** Envia a temperatura da CPU acompanhada do indicador fixo `°C` e da carga de trabalho (`%`).
   * **Modo Placa de Vídeo (GPU):** Envia a temperatura de Hot Spot da GPU com o marcador `°F` (usado por especificação de hardware para rápida identificação visual) e o consumo elétrico real em `Watts`.
-  * **Modo FPS & VRAM:** Envia a taxa de quadros em tempo real (`FPS`) com o marcador luminoso `°F` (`p°`) no display principal e o percentual de uso de `VRAM` (`%`) no display secundário.
+  * **Modo FPS & VRAM:** Envia a taxa de quadros em tempo real (`FPS`) no display principal e o percentual de consumo de `VRAM` (`%`) no display secundário.
 * **🔔 Integração Completa com a Bandeja do Sistema (System Tray):**
   * Inicialização silenciosa opcional em segundo plano através do parâmetro `-hide`.
   * Menu de contexto comercial em português para restauração, ocultação e encerramento limpo da aplicação.

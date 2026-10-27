@@ -73,7 +73,7 @@ class RTSSReader:
 
     def try_launch_rtss(self):
         now = time.time()
-        if not self.has_rtss_installed or (now - self.last_check_launch < 45.0):
+        if not self.has_rtss_installed or (now - self.last_check_launch < 10.0):
             return
         self.last_check_launch = now
         for p in psutil.process_iter(["name"]):
@@ -83,9 +83,12 @@ class RTSSReader:
             except Exception:
                 pass
         try:
-            subprocess.Popen([self.rtss_path], creationflags=subprocess.CREATE_NO_WINDOW)
+            shell32.ShellExecuteW(None, "open", self.rtss_path, None, os.path.dirname(self.rtss_path), 0)
         except Exception:
-            pass
+            try:
+                shell32.ShellExecuteW(None, "runas", self.rtss_path, None, os.path.dirname(self.rtss_path), 0)
+            except Exception:
+                pass
 
     def read_fps(self):
         h_map = kernel32.OpenFileMappingW(FILE_MAP_READ, False, "RTSSSharedMemoryV2")
@@ -154,13 +157,14 @@ class PresentMonReader:
         self.running = False
         self.lock = threading.Lock()
         self.recent_presents = []
+        self.last_start_time = 0.0
         self.exe_path = self._find_presentmon()
 
     def _find_presentmon(self):
         cands = [
-            r"C:\Program Files\NVIDIA Corporation\FrameViewSDK\bin\PresentMon_x64.exe",
             r"C:\Program Files (x86)\RivaTuner Statistics Server\Plugins\Client\PresentMonDataProvider\PresentMon-2.3.1-x64-DLSS4.exe",
             r"C:\Program Files (x86)\RivaTuner Statistics Server\Plugins\Client\PresentMonDataProvider\PresentMon-2.3.1-x64.exe",
+            r"C:\Program Files\NVIDIA Corporation\FrameViewSDK\bin\PresentMon_x64.exe",
         ]
         for c in cands:
             if os.path.exists(c):
@@ -168,22 +172,33 @@ class PresentMonReader:
         return None
 
     def start(self):
-        if not self.exe_path or self.running:
+        now = time.time()
+        if not self.exe_path or self.running or (now - self.last_start_time < 3.0):
             return
+        self.last_start_time = now
         self.running = True
         self.thread = threading.Thread(target=self._run, daemon=True)
         self.thread.start()
 
     def _run(self):
         try:
+            try:
+                subprocess.run(["logman", "stop", "FulgorPCista_ETW", "-ets"], capture_output=True, timeout=1.0)
+            except Exception:
+                pass
+
             cmd = [
                 self.exe_path,
+                "--session_name", "FulgorPCista_ETW",
+                "--stop_existing_session",
                 "--output_stdout",
-                "--no_csv",
+                "--exclude", "dwm.exe",
+                "--exclude", "explorer.exe",
                 "--exclude", "FulgorPCista.exe",
                 "--exclude", "OpenHardwareMonitorServer.exe",
-                "--exclude", "dwm.exe",
+                "--exclude", "svchost.exe",
             ]
+
             self.proc = subprocess.Popen(
                 cmd,
                 stdout=subprocess.PIPE,
@@ -196,7 +211,13 @@ class PresentMonReader:
                 if not self.running:
                     break
                 line = line.strip()
-                if not line or line.startswith("Application,") or line.startswith("PresentMon"):
+                if not line or "," not in line or line.startswith("Application,") or line.startswith("PresentMon") or line.startswith("warning") or line.startswith("error"):
+                    continue
+                parts = line.split(",")
+                if len(parts) < 5:
+                    continue
+                app_name = parts[0].strip().lower()
+                if any(ex in app_name for ex in ["dwm", "explorer", "fulgor", "openhardware", "antigravity", "devenv", "svchost"]):
                     continue
                 now = time.time()
                 with self.lock:
@@ -208,6 +229,16 @@ class PresentMonReader:
             pass
         finally:
             self.running = False
+            if self.proc:
+                try:
+                    self.proc.terminate()
+                except Exception:
+                    pass
+                self.proc = None
+            try:
+                subprocess.run(["logman", "stop", "FulgorPCista_ETW", "-ets"], capture_output=True, timeout=1.0)
+            except Exception:
+                pass
 
     def get_fps(self):
         now = time.time()
@@ -216,7 +247,7 @@ class PresentMonReader:
             while self.recent_presents and self.recent_presents[0] < cutoff:
                 self.recent_presents.pop(0)
             count = len(self.recent_presents)
-            if count == 0:
+            if count == 0 or (now - self.recent_presents[-1] > 1.2):
                 return 0.0
             return round(count / 1.2, 0)
 
@@ -228,6 +259,10 @@ class PresentMonReader:
             except Exception:
                 pass
             self.proc = None
+        try:
+            subprocess.run(["logman", "stop", "FulgorPCista_ETW", "-ets"], capture_output=True, timeout=1.0)
+        except Exception:
+            pass
 
 
 class MonitorCore:
@@ -511,7 +546,7 @@ class MonitorCore:
             setupapi.SetupDiDestroyDeviceInfoList(hDevInfo)
         return found_path
 
-    def _send_cooler_packet(self, temp_celsius: float, sec_val: float, is_cpu: bool, led_on: bool):
+    def _send_cooler_packet(self, temp_celsius: float, sec_val: float, mode_code: int, led_on: bool):
         """Send 64-byte HID Feature Report (Report ID 0x07) directly to cooler."""
         if not self.hid_handle:
             path = self._find_cooler_hid_path()
@@ -532,10 +567,12 @@ class MonitorCore:
             pkt[2] = (t_int // 10) % 10
             pkt[3] = t_int % 10
 
-            # Mode flag: 0x10 for CPU (°C), 0x01 for GPU (°F marker)
-            pkt[4] = 0x10 if is_cpu else 0x01
+            # Mode flag in byte 4:
+            # 0x10 = Main °C, Secondary % (CPU mode or VRAM % mode)
+            # 0x01 = Main °F, Secondary W (GPU power mode)
+            pkt[4] = mode_code
 
-            # Secondary 3-digit display (CPU load % or GPU power Watts / load %)
+            # Secondary 3-digit display (CPU load % or GPU power Watts or VRAM %)
             # pkt[5] = hundreds, pkt[6] = tens, pkt[7] = units
             s_int = max(0, min(999, int(round(sec_val))))
             pkt[5] = (s_int // 100) % 10  # Hundreds digit
@@ -584,7 +621,7 @@ class MonitorCore:
                     dev, _ = winreg.QueryValueEx(key, "device_type")
                     if str(dev) == "2":
                         self.stats["active_device"] = "FPS"
-                        self.stats["active_unit"] = "°F"
+                        self.stats["active_unit"] = "%"
                     elif str(dev) == "0":
                         self.stats["active_device"] = "GPU"
                         self.stats["active_unit"] = "°F"
@@ -614,7 +651,7 @@ class MonitorCore:
         dev = str(device).upper()
         if "FPS" in dev or "VRAM" in dev:
             dev_upper = "FPS"
-            dev_unit = "°F"
+            dev_unit = "%"
             dev_val = 2
             temp_val = 2
         elif "GPU" in dev:
@@ -737,6 +774,8 @@ class MonitorCore:
             # Read FPS from RTSS or PresentMon
             cur_fps = self.rtss_reader.read_fps()
             if cur_fps <= 0.0:
+                if not self.pmon_reader.running:
+                    self.pmon_reader.start()
                 cur_fps = self.pmon_reader.get_fps()
 
             # Ensure motherboard temperature is active and representative of system thermal state
@@ -781,22 +820,22 @@ class MonitorCore:
                 led_on = True
 
                 if active_dev == "FPS":
-                    # Main display: FPS with 0x01 (°F / p° indicator)
-                    # Secondary display: VRAM % with 0-100 and % glyph
+                    # Main display: FPS
+                    # Secondary display: VRAM % with 0-100 and % glyph (0x10)
                     disp_temp = float(self.stats["fps"])
                     disp_sec = float(self.stats["gpu_vram_load"])
-                    is_cpu = False
+                    mode_code = 0x10  # 0x10 forces % glyph on the secondary display!
                 elif active_dev == "GPU":
                     disp_temp = float(self.stats["gpu_temp"])
                     disp_sec = float(self.stats["gpu_power"] if self.stats["gpu_power"] > 0 else self.stats["gpu_load"])
-                    is_cpu = False
+                    mode_code = 0x01  # 0x01 forces W glyph on the secondary display
                 else:  # CPU
                     disp_temp = float(self.stats["cpu_temp"])
                     disp_sec = float(self.stats["cpu_load"])
-                    is_cpu = True
+                    mode_code = 0x10  # 0x10 forces % glyph on the secondary display
 
             # 4. Send packet directly to USB HID Cooler outside lock
-            connected = self._send_cooler_packet(disp_temp, disp_sec, is_cpu, True)
+            connected = self._send_cooler_packet(disp_temp, disp_sec, mode_code, True)
             with self.lock:
                 self.stats["cooler_connected"] = connected
 
