@@ -22,8 +22,8 @@ def _sys_ex(tp, val, tb):
 sys.excepthook = _sys_ex
 
 APP_NAME = "Fulgor PCista"
-APP_VERSION = "1.3.0"
-APP_COMP = 20
+APP_VERSION = "1.4.0"
+APP_COMP = 21
 APP_CODENAME = "Ororo"
 WINDOW_TITLE = f"{APP_NAME} (v{APP_VERSION} - {APP_CODENAME})"
 
@@ -100,6 +100,7 @@ class WinFormsTrayManager:
         self.is_quitting = False
         self.notify = None
         self.form = None
+        self.web_loaded = False
 
     def on_closing(self):
         """When user clicks X on window, hide window to tray instead of quitting."""
@@ -112,16 +113,32 @@ class WinFormsTrayManager:
         if self.form:
             import System
             import System.Windows.Forms as WinForms
+            import System.Drawing as Drawing
             def _show():
+                # If window was created off-screen (-32000), re-center it on primary screen
+                if self.form.Location.X < -1000 or self.form.Location.Y < -1000:
+                    try:
+                        self.form.CenterToScreen()
+                    except Exception:
+                        scr = WinForms.Screen.FromControl(self.form).WorkingArea
+                        self.form.Location = Drawing.Point(
+                            max(0, (scr.Width - self.form.Width) // 2),
+                            max(0, (scr.Height - self.form.Height) // 2)
+                        )
+
                 self.form.Visible = True
                 self.form.ShowInTaskbar = True
                 self.form.WindowState = WinForms.FormWindowState.Normal
+                self.form.BringToFront()
                 self.form.Activate()
+                self.form.Invalidate(True)
+                self.form.Update()
+
             try:
                 self.form.Invoke(System.Action(_show))
                 apply_dark_titlebar()
-            except Exception:
-                pass
+            except Exception as e:
+                logging.error(f"show_window error: {e}")
 
     def hide_window(self):
         if self.form:
@@ -131,8 +148,8 @@ class WinFormsTrayManager:
                 self.form.ShowInTaskbar = False
             try:
                 self.form.Invoke(System.Action(_hide))
-            except Exception:
-                pass
+            except Exception as e:
+                logging.error(f"hide_window error: {e}")
 
     def quit_app(self):
         self.is_quitting = True
@@ -148,6 +165,13 @@ class WinFormsTrayManager:
                 self.form.Invoke(System.Action(self.form.Close))
             except Exception:
                 pass
+
+    def on_loaded(self):
+        """Fires when WebView2 DOM and JS API are fully initialized and ready."""
+        logging.info("on_loaded: WebView2 DOM and JS API fully initialized.")
+        self.web_loaded = True
+        if self.start_hidden:
+            self.hide_window()
 
     def setup_tray(self):
         from webview.platforms.winforms import BrowserView
@@ -234,8 +258,9 @@ class WinFormsTrayManager:
                 logging.info("_init: NotifyIcon is now Visible=True")
 
                 if self.start_hidden:
-                    self.form.Visible = False
                     self.form.ShowInTaskbar = False
+                    if self.web_loaded:
+                        self.form.Visible = False
             except Exception as e:
                 logging.error(f"_init error: {e}", exc_info=True)
 
@@ -252,8 +277,6 @@ class WinFormsTrayManager:
 
     def on_shown(self):
         apply_dark_titlebar()
-        if self.start_hidden:
-            self.hide_window()
 
 
 def main():
@@ -264,21 +287,27 @@ def main():
 
     html_path = get_resource_path(os.path.join("ui", "index.html"))
 
+    init_x = -32000 if start_hidden else None
+    init_y = -32000 if start_hidden else None
+
     window = webview.create_window(
         title=WINDOW_TITLE,
         url=f"file:///{html_path.replace(os.sep, '/')}",
         js_api=api,
         width=550,
         height=695,
+        x=init_x,
+        y=init_y,
         resizable=False,
         frameless=False,
-        hidden=start_hidden,
+        hidden=False,
         background_color="#111418",
     )
 
     tray = WinFormsTrayManager(window, start_hidden)
     window.events.closing += tray.on_closing
     window.events.shown += tray.on_shown
+    window.events.loaded += tray.on_loaded
 
     threading.Thread(target=tray.setup_tray, daemon=True).start()
 

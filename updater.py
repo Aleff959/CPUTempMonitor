@@ -26,7 +26,7 @@ def _parse_comp_number(text):
 
 
 class AppUpdater:
-    def __init__(self, current_version="1.3.0", current_comp=20):
+    def __init__(self, current_version="1.4.0", current_comp=21):
         self.current_version = current_version
         self.current_comp = current_comp
         self.update_info = None

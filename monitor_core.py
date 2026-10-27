@@ -627,20 +627,6 @@ class MonitorCore:
                     continue
             if key:
                 try:
-                    dev, _ = winreg.QueryValueEx(key, "device_type")
-                    if str(dev) == "2":
-                        self.stats["active_device"] = "FPS"
-                        self.stats["active_unit"] = "%"
-                    elif str(dev) == "0":
-                        self.stats["active_device"] = "GPU"
-                        self.stats["active_unit"] = "°F"
-                    else:
-                        self.stats["active_device"] = "CPU"
-                        self.stats["active_unit"] = "°C"
-                except OSError:
-                    pass
-
-                try:
                     auto_sw, _ = winreg.QueryValueEx(key, "auto_switch_fps")
                     self.stats["auto_switch_fps"] = 1 if str(auto_sw) != "0" else 0
                 except OSError:
@@ -648,10 +634,18 @@ class MonitorCore:
 
                 winreg.CloseKey(key)
 
-            cur_dev = self.stats["active_device"]
-            self.last_user_device = cur_dev if cur_dev in ["CPU", "GPU"] else "CPU"
+            # Regra: CPU (°C e carga %) é sempre o padrão primário de inicialização do app e do PC.
+            # O modo FPS / VRAM só se ativa de forma automática ao entrar em um jogo.
+            self.stats["active_device"] = "CPU"
+            self.stats["active_unit"] = "°C"
+            self.last_user_device = "CPU"
+            self.auto_switched = False
+            self.save_registry_device(1, 0)
         except Exception:
-            pass
+            self.stats["active_device"] = "CPU"
+            self.stats["active_unit"] = "°C"
+            self.last_user_device = "CPU"
+            self.auto_switched = False
 
     def save_registry_device(self, dev_type, temp_type):
         for sub in [r"Software\Fulgor PCista", r"Software\CPU TEMP Monitor"]:
