@@ -785,6 +785,101 @@
     .btn-modal-close-action:hover {
       box-shadow: 0 2px 10px rgba(0, 176, 255, 0.4);
     }
+
+    /* Central de Atualizações OTA */
+    .updater-card {
+      background: var(--md-sys-color-surface);
+      border-radius: 12px;
+      padding: 10px 12px;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .updater-status-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+    }
+
+    .updater-info {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+
+    .updater-version-label {
+      font-size: 11.5px;
+      font-weight: 700;
+      color: var(--md-sys-color-on-surface);
+    }
+
+    .updater-status-sub {
+      font-size: 10.5px;
+      color: var(--md-sys-color-outline);
+    }
+
+    .btn-check-update {
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      color: var(--md-sys-color-on-surface);
+      padding: 6px 12px;
+      border-radius: 14px;
+      font-size: 11px;
+      font-weight: 600;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      transition: all 0.2s;
+    }
+
+    .btn-check-update:hover {
+      background: rgba(255, 255, 255, 0.1);
+      border-color: var(--md-sys-color-primary);
+    }
+
+    .update-available-banner {
+      background: rgba(105, 240, 174, 0.08);
+      border: 1px solid rgba(105, 240, 174, 0.2);
+      border-radius: 10px;
+      padding: 10px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .btn-apply-update {
+      background: #00e676;
+      color: #002714;
+      border: none;
+      padding: 7px 14px;
+      border-radius: 12px;
+      font-size: 11.5px;
+      font-weight: 800;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      transition: all 0.2s;
+    }
+
+    .btn-apply-update:hover {
+      box-shadow: 0 2px 10px rgba(0, 230, 118, 0.4);
+    }
+
+    .update-badge-dot {
+      display: inline-block;
+      width: 7px;
+      height: 7px;
+      background: #69f0ae;
+      border-radius: 50%;
+      margin-left: 4px;
+      box-shadow: 0 0 6px #69f0ae;
+    }
   </style>
 </head>
 <body>
@@ -792,7 +887,7 @@
     <div class="app-branding">
       <div class="app-icon">⚡</div>
       <div class="app-title">Fulgor PCista</div>
-      <span class="version-tag">v1.3.0 | Comp. 19</span>
+      <span class="version-tag">v1.3.0 | Comp. 20</span>
     </div>
     <div class="usb-badge" id="usbStatusBadge">● Visor Digital Conectado</div>
   </div>
@@ -960,13 +1055,30 @@
           <div class="modal-icon">⚡</div>
           <div>
             <div class="modal-title">Fulgor PCista</div>
-            <div class="modal-subtitle">v1.3.0 (Ororo) • Comp. 19</div>
+            <div class="modal-subtitle">v1.3.0 (Ororo) • Comp. 20</div>
           </div>
         </div>
         <button class="modal-close-btn" onclick="closeAboutModal()" title="Fechar">✕</button>
       </div>
 
       <div class="modal-body">
+        <!-- Central de Atualizações OTA -->
+        <div class="about-sec">
+          <span class="about-sec-lbl">🚀 Atualizações do Sistema</span>
+          <div class="updater-card">
+            <div class="updater-status-row">
+              <div class="updater-info">
+                <span class="updater-version-label" id="updaterVersionLbl">Versão instalada: v1.3.0 (Comp. 20)</span>
+                <span class="updater-status-sub" id="updaterStatusSub">Pronto para buscar novas atualizações no GitHub</span>
+              </div>
+              <button class="btn-check-update" id="btnCheckUpdate" onclick="triggerCheckUpdates()">
+                <span>🔄</span> Verificar
+              </button>
+            </div>
+            <div id="updaterActionArea" style="display: none; margin-top: 8px;"></div>
+          </div>
+        </div>
+
         <!-- Hardware Homologado -->
         <div class="about-sec">
           <span class="about-sec-lbl">🎯 Dispositivo Homologado</span>
@@ -1069,6 +1181,101 @@
         pywebview.api.set_auto_switch(checked).catch(() => {});
       }
     }
+
+    let latestUpdateInfo = null;
+
+    async function triggerCheckUpdates() {
+      const btn = document.getElementById('btnCheckUpdate');
+      const sub = document.getElementById('updaterStatusSub');
+      const actionArea = document.getElementById('updaterActionArea');
+      
+      btn.disabled = true;
+      btn.innerText = 'Buscando...';
+      sub.innerText = 'Consultando GitHub Releases...';
+      sub.style.color = 'var(--md-sys-color-outline)';
+      actionArea.style.display = 'none';
+
+      if (window.pywebview && window.pywebview.api && window.pywebview.api.check_updates) {
+        try {
+          const res = await pywebview.api.check_updates();
+          latestUpdateInfo = res;
+          btn.disabled = false;
+          btn.innerText = '🔄 Verificar';
+
+          if (res.success) {
+            if (res.has_update) {
+              sub.innerText = '⚡ Nova versão disponível: ' + (res.latest_title || res.latest_version);
+              sub.style.color = '#69f0ae';
+              actionArea.style.display = 'block';
+              actionArea.innerHTML = `
+                <div class="update-available-banner">
+                  <div style="font-size: 11.5px; font-weight: 700; color: #69f0ae;">Nova Atualização Encontrada!</div>
+                  <div style="font-size: 10px; color: var(--md-sys-color-on-surface-variant);">Tamanho: ${res.asset_size_mb || 0} MB • Arquivo: ${res.asset_name || 'Executável'}</div>
+                  <button class="btn-apply-update" id="btnApplyUpdate" onclick="triggerApplyUpdate('${res.download_url}')">
+                    🚀 Baixar e Atualizar Agora
+                  </button>
+                </div>
+              `;
+            } else {
+              sub.innerText = '✅ Você já está na versão mais recente (' + res.current_version + ').';
+              sub.style.color = '#81c784';
+            }
+          } else {
+            sub.innerText = '⚠️ Não foi possível verificar: ' + (res.error || 'Erro de conexão');
+            sub.style.color = '#ffb77c';
+          }
+        } catch (e) {
+          btn.disabled = false;
+          btn.innerText = '🔄 Verificar';
+          sub.innerText = 'Erro ao consultar atualizações.';
+        }
+      }
+    }
+
+    async function triggerApplyUpdate(url) {
+      const btn = document.getElementById('btnApplyUpdate');
+      if (btn) {
+        btn.disabled = true;
+        btn.innerText = '⏳ Baixando e aplicando atualização...';
+      }
+      const sub = document.getElementById('updaterStatusSub');
+      if (sub) sub.innerText = 'Baixando arquivo e preparando reinicialização limpa...';
+
+      if (window.pywebview && window.pywebview.api && window.pywebview.api.apply_update) {
+        try {
+          const res = await pywebview.api.apply_update(url);
+          if (res.success) {
+            if (sub) sub.innerText = '✅ Atualização aplicada! Reiniciando...';
+          } else {
+            alert('Falha ao atualizar: ' + (res.error || 'Erro desconhecido'));
+            if (btn) {
+              btn.disabled = false;
+              btn.innerText = 'Tentar Novamente';
+            }
+          }
+        } catch (e) {
+          alert('Erro ao executar atualização: ' + e);
+        }
+      }
+    }
+
+    setTimeout(async () => {
+      if (window.pywebview && window.pywebview.api && window.pywebview.api.check_updates) {
+        try {
+          const res = await pywebview.api.check_updates();
+          if (res && res.has_update) {
+            const btnAbout = document.querySelector('.btn-about');
+            if (btnAbout && !document.getElementById('aboutUpdateDot')) {
+              const dot = document.createElement('span');
+              dot.id = 'aboutUpdateDot';
+              dot.className = 'update-badge-dot';
+              dot.title = 'Nova versão disponível no GitHub!';
+              btnAbout.appendChild(dot);
+            }
+          }
+        } catch (e) {}
+      }
+    }, 4500);
 
     function updateUi(data) {
       if (!data) return;

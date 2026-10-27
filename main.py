@@ -6,6 +6,7 @@ import time
 import logging
 import webview
 from monitor_core import MonitorCore
+from updater import AppUpdater
 
 log_path = os.path.expandvars(r"%TEMP%\cputemp_debug.log")
 logging.basicConfig(filename=log_path, filemode="w", level=logging.DEBUG, format="%(asctime)s [%(levelname)s] %(message)s")
@@ -22,6 +23,7 @@ sys.excepthook = _sys_ex
 
 APP_NAME = "Fulgor PCista"
 APP_VERSION = "1.3.0"
+APP_COMP = 20
 APP_CODENAME = "Ororo"
 WINDOW_TITLE = f"{APP_NAME} (v{APP_VERSION} - {APP_CODENAME})"
 
@@ -29,6 +31,7 @@ WINDOW_TITLE = f"{APP_NAME} (v{APP_VERSION} - {APP_CODENAME})"
 class Api:
     def __init__(self, core: MonitorCore):
         self._core = core
+        self._updater = AppUpdater(current_version=APP_VERSION, current_comp=APP_COMP)
 
     def get_stats(self):
         return self._core.get_data()
@@ -53,6 +56,12 @@ class Api:
         except Exception as e:
             logging.error(f"Failed to open url {url}: {e}")
             return False
+
+    def check_updates(self):
+        return self._updater.check_for_updates()
+
+    def apply_update(self, download_url=None):
+        return self._updater.apply_update(download_url)
 
 
 def apply_dark_titlebar():

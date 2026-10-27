@@ -27,6 +27,7 @@ Substitui totalmente os utilitários proprietários pesados e instáveis (`Devic
   * Inicialização silenciosa opcional em segundo plano através do parâmetro `-hide`.
   * Menu de contexto comercial em português para restauração, ocultação e encerramento limpo da aplicação.
   * Automação sem alertas repetitivos de UAC via Agendador de Tarefas do Windows.
+* **🚀 Executável Único & Central de Atualizações OTA:** Distribuído em executável único portátil (.exe OneFile) com sistema de atualização integrado ao GitHub Releases. Notifica sobre novas versões, permite verificar novidades e aplica atualizações automaticamente com reinício transparente.
 * **ℹ️ Painel Informativo "Sobre":** Seção integrada com dados do hardware testado, referências da fabricante, créditos de engenharia reversa e tecnologias empregadas.
 
 ---
