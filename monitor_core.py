@@ -102,7 +102,7 @@ class RTSSReader:
             try:
                 raw_header = ctypes.string_at(p_mem, 64)
                 dw_sig, dw_ver, dw_app_entry_size, dw_app_arr_offset, dw_app_arr_size = struct.unpack_from("<5I", raw_header, 0)
-                if dw_sig != 0x53535452 or dw_ver < 0x00020000:
+                if dw_sig not in (0x53535452, 0x52545353) or dw_ver < 0x00020000:
                     return 0.0
 
                 now = time.time()
