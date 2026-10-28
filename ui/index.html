@@ -507,10 +507,37 @@
 
     .control-note {
       font-size: 10.5px;
+      color: var(--md-sys-color-on-surface-variant);
+      line-height: 1.45;
+      padding-top: 8px;
+      border-top: 1px solid rgba(255, 255, 255, 0.06);
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+    }
+
+    .control-note-title {
+      font-weight: 700;
+      color: var(--md-sys-color-primary);
+      font-size: 11px;
+    }
+
+    .control-note-list {
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+      padding-left: 2px;
+    }
+
+    .control-note-explanation {
+      font-size: 10px;
       color: var(--md-sys-color-outline);
+      background: rgba(255, 255, 255, 0.03);
+      padding: 6px 8px;
+      border-radius: 8px;
+      border-left: 2px solid var(--md-sys-color-primary);
+      margin-top: 2px;
       line-height: 1.4;
-      padding-top: 4px;
-      border-top: 1px solid rgba(255, 255, 255, 0.05);
     }
 
     /* Footer Bar with "Sobre" Button */
@@ -758,6 +785,98 @@
       border: 1px solid rgba(255, 255, 255, 0.05);
     }
 
+    /* Telemetry Convention Card & Info Tooltip */
+    .telemetry-convention-card {
+      background: var(--md-sys-color-surface);
+      border-radius: 14px;
+      padding: 12px 14px;
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .convention-item {
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+      padding-bottom: 6px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+    }
+
+    .convention-item:last-of-type {
+      border-bottom: none;
+      padding-bottom: 0;
+    }
+
+    .convention-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+    }
+
+    .convention-badge {
+      font-size: 10px;
+      font-weight: 700;
+      padding: 2px 7px;
+      border-radius: 6px;
+      text-transform: uppercase;
+      letter-spacing: 0.4px;
+    }
+
+    .convention-badge.mode-cpu {
+      background: rgba(128, 212, 255, 0.15);
+      color: #80d4ff;
+    }
+
+    .convention-badge.mode-gpu {
+      background: rgba(255, 183, 124, 0.15);
+      color: #ffb77c;
+    }
+
+    .convention-badge.mode-fps {
+      background: rgba(105, 240, 174, 0.15);
+      color: #69f0ae;
+    }
+
+    .convention-glyphs {
+      font-size: 10.5px;
+      color: var(--md-sys-color-outline);
+    }
+
+    .convention-details {
+      font-size: 11px;
+      color: var(--md-sys-color-on-surface-variant);
+      line-height: 1.4;
+      padding-left: 2px;
+    }
+
+    .convention-rationale {
+      font-size: 10.5px;
+      color: var(--md-sys-color-outline);
+      background: rgba(255, 255, 255, 0.02);
+      padding: 8px 10px;
+      border-radius: 10px;
+      line-height: 1.45;
+      border-left: 2px solid #ffb77c;
+      margin-top: 4px;
+    }
+
+    .info-badge {
+      font-size: 11.5px;
+      cursor: help;
+      opacity: 0.75;
+      margin-left: 6px;
+      display: inline-flex;
+      align-items: center;
+      transition: opacity 0.2s;
+    }
+
+    .info-badge:hover {
+      opacity: 1;
+    }
+
     .modal-footer-row {
       display: flex;
       align-items: center;
@@ -888,7 +1007,7 @@
     <div class="app-branding">
       <div class="app-icon">⚡</div>
       <div class="app-title">Fulgor PCista</div>
-      <span class="version-tag" onclick="openAboutModal()" style="cursor: pointer;" title="Clique para abrir Sobre e Atualizações">v1.4.0 | Comp. 21</span>
+      <span class="version-tag" onclick="openAboutModal()" style="cursor: pointer;" title="Clique para abrir Sobre e Atualizações">v1.5.0 | Comp. 22</span>
     </div>
     <div class="usb-badge" id="usbStatusBadge">● Visor Digital Conectado</div>
   </div>
@@ -903,13 +1022,13 @@
           <span id="bannerActiveDevice">Processador (CPU)</span>
         </div>
       </div>
-      <div class="banner-unit-badge" id="bannerUnitBadge">Marcador do Visor: °C</div>
+      <div class="banner-unit-badge" id="bannerUnitBadge" title="Convenção de hardware: Registrador 0x10 (°C & %) e Registrador 0x01 (°F & W)">Marcador do Visor: °C</div>
     </div>
 
     <!-- 2x2 Primary Metrics Grid (CPU, GPU, FPS & VRAM, Placa-Mãe) -->
     <div class="metrics-grid">
       <!-- CPU Card -->
-      <div class="metric-card active-target" id="cardCpu" onclick="setDevice('CPU')" title="Clique para sincronizar o visor digital com o Processador">
+      <div class="metric-card active-target" id="cardCpu" onclick="setDevice('CPU')" title="Processador (CPU): Visor Principal = Temp. CPU (°C) | Visor Secundário = Carga de Trabalho (%) [Modo 0x10] • Clique para sincronizar">
         <div class="card-header">
           <div class="card-title">
             <span>💻 Processador (CPU)</span>
@@ -933,10 +1052,11 @@
       </div>
 
       <!-- GPU Card -->
-      <div class="metric-card" id="cardGpu" onclick="setDevice('GPU')" title="Clique para sincronizar o visor digital com a Placa de Vídeo">
+      <div class="metric-card" id="cardGpu" onclick="setDevice('GPU')" title="Placa de Vídeo (GPU): Visor Principal = GPU Hot Spot (°C com marcador físico °F no visor) | Visor Secundário = Consumo Elétrico (W) [Modo 0x01] • Clique para sincronizar">
         <div class="card-header">
           <div class="card-title">
             <span>🎮 GPU (Hot Spot)</span>
+            <span class="info-badge" title="Convenção do Visor: O hardware do cooler acende o marcador luminoso '°F' para distinguir visualmente a telemetria de Hot Spot do processador (°C) e habilitar a exibição de consumo em Watts (W) no visor secundário. O valor exibido na tela do app é a temperatura real em °C.">ℹ️</span>
           </div>
           <span class="live-chip" id="chipGpu">VISOR ATIVO</span>
         </div>
@@ -961,7 +1081,7 @@
       </div>
 
       <!-- FPS & VRAM Card -->
-      <div class="metric-card" id="cardFps" onclick="setDevice('FPS')" title="Clique para sincronizar o visor digital com a Taxa de Quadros (FPS) e consumo de VRAM">
+      <div class="metric-card" id="cardFps" onclick="setDevice('FPS')" title="Jogos (FPS & VRAM): Visor Principal = Taxa de Quadros em Tempo Real (FPS) | Visor Secundário = Consumo de Memória VRAM (%) [Modo 0x10] • Clique para sincronizar">
         <div class="card-header">
           <div class="card-title">
             <span>🎯 FPS & VRAM</span>
@@ -985,7 +1105,7 @@
       </div>
 
       <!-- Motherboard Dedicated Card (Sistema) -->
-      <div class="metric-card" id="cardMb" style="cursor: default;" title="Telemetria de sistema da Placa-Mãe">
+      <div class="metric-card" id="cardMb" style="cursor: default;" title="Telemetria de Sistema: Monitoramento térmico de VRM e barramento da Placa-Mãe (exclusivo na tela do app)">
         <div class="card-header">
           <div class="card-title">
             <span>🎛️ Placa-Mãe (VRM)</span>
@@ -1017,9 +1137,9 @@
           <span class="control-subtitle">Escolha qual métrica enviar em tempo real para o cooler</span>
         </div>
         <div class="segmented-button">
-          <button class="seg-btn active" id="btnCpu" onclick="setDevice('CPU')">💻 Processador (°C)</button>
-          <button class="seg-btn" id="btnGpu" onclick="setDevice('GPU')">🎮 Placa de Vídeo (°F)</button>
-          <button class="seg-btn" id="btnFps" onclick="setDevice('FPS')">🎯 FPS & VRAM (%)</button>
+          <button class="seg-btn active" id="btnCpu" onclick="setDevice('CPU')" title="Modo CPU: Visor Principal = Temp. CPU (°C) | Visor Secundário = Carga (%) [Registrador 0x10]">💻 Processador (°C)</button>
+          <button class="seg-btn" id="btnGpu" onclick="setDevice('GPU')" title="Modo GPU: Visor Principal = GPU Hot Spot (°C com marcador físico °F) | Visor Secundário = Consumo em Watts (W) [Registrador 0x01]">🎮 Placa de Vídeo (°F)</button>
+          <button class="seg-btn" id="btnFps" onclick="setDevice('FPS')" title="Modo FPS & VRAM: Visor Principal = Taxa de Quadros (FPS) | Visor Secundário = Consumo de VRAM (%) [Registrador 0x10]">🎯 FPS & VRAM (%)</button>
         </div>
       </div>
 
@@ -1036,7 +1156,15 @@
       </div>
 
       <div class="control-note">
-        * No modo FPS & VRAM, o cooler exibe o FPS em tempo real no visor principal e a porcentagem de consumo da VRAM no visor secundário (%).
+        <div class="control-note-title">📌 Convenção de Exibição no Visor Digital do Cooler:</div>
+        <div class="control-note-list">
+          <div>• <strong>Processador (CPU):</strong> Visor Principal = Temp. CPU (<strong>°C</strong>) | Visor Secundário = Carga da CPU (<strong>%</strong>) <em>[Modo 0x10]</em>.</div>
+          <div>• <strong>Placa de Vídeo (GPU):</strong> Visor Principal = GPU Hot Spot (<strong>°C</strong> com marcador luminoso <strong>°F</strong> de hardware) | Visor Secundário = Consumo em Watts (<strong>W</strong>) <em>[Modo 0x01]</em>.</div>
+          <div>• <strong>Jogos (FPS & VRAM):</strong> Visor Principal = Taxa de Quadros (<strong>FPS</strong>) | Visor Secundário = Consumo de VRAM (<strong>%</strong>) <em>[Modo 0x10]</em>.</div>
+        </div>
+        <div class="control-note-explanation">
+          💡 <em>Por que o visor acende °F na GPU?</em> No microcontrolador do cooler (VID 1A2C / PID 4984), a unidade de Watts (W) é acoplada fisicamente ao registrador 0x01 (°F). O app envia o Hot Spot em °C e aproveita o glifo °F como marcador térmico visual de hardware para você distinguir facilmente a GPU da CPU.
+        </div>
       </div>
     </div>
 
@@ -1056,7 +1184,7 @@
           <div class="modal-icon">⚡</div>
           <div>
             <div class="modal-title">Fulgor PCista</div>
-            <div class="modal-subtitle">v1.4.0 (Ororo) • Comp. 21</div>
+            <div class="modal-subtitle">v1.5.0 (Ororo) • Comp. 22</div>
           </div>
         </div>
         <button class="modal-close-btn" onclick="closeAboutModal()" title="Fechar">✕</button>
@@ -1069,7 +1197,7 @@
           <div class="updater-card">
             <div class="updater-status-row">
               <div class="updater-info">
-                <span class="updater-version-label" id="updaterVersionLbl">Versão instalada: v1.4.0 (Comp. 21)</span>
+                <span class="updater-version-label" id="updaterVersionLbl">Versão instalada: v1.5.0 (Comp. 22)</span>
                 <span class="updater-status-sub" id="updaterStatusSub">Pronto para buscar novas atualizações no GitHub</span>
               </div>
               <button class="btn-check-update" id="btnCheckUpdate" onclick="triggerCheckUpdates()">
@@ -1086,6 +1214,49 @@
           <div class="device-card">
             <span class="device-name">AIR COOLER TEMP 6 PRO BLACK</span>
             <span class="device-meta">Cooler Digital com display duplo integrado via USB HID (VID 1A2C / PID 4984). Telemetria nativa direta em milissegundos sem drivers pesados.</span>
+          </div>
+        </div>
+
+        <!-- Convenção de Telemetria e Hardware -->
+        <div class="about-sec">
+          <span class="about-sec-lbl">📊 Convenção de Unidades do Cooler Digital</span>
+          <div class="telemetry-convention-card">
+            <div class="convention-item">
+              <div class="convention-header">
+                <span class="convention-badge mode-cpu">Modo CPU (0x10)</span>
+                <span class="convention-glyphs">Glifos no Cooler: <strong>°C</strong> & <strong>%</strong></span>
+              </div>
+              <div class="convention-details">
+                • <strong>Visor Principal:</strong> Temperatura da CPU em °C<br>
+                • <strong>Visor Secundário:</strong> Carga de Trabalho da CPU em %
+              </div>
+            </div>
+
+            <div class="convention-item">
+              <div class="convention-header">
+                <span class="convention-badge mode-gpu">Modo GPU (0x01)</span>
+                <span class="convention-glyphs">Glifos no Cooler: <strong>°F</strong> & <strong>W</strong></span>
+              </div>
+              <div class="convention-details">
+                • <strong>Visor Principal:</strong> GPU Hot Spot em °C (marcador físico °F ativo)<br>
+                • <strong>Visor Secundário:</strong> Consumo Elétrico da GPU em Watts (W)
+              </div>
+            </div>
+
+            <div class="convention-item">
+              <div class="convention-header">
+                <span class="convention-badge mode-fps">Modo FPS & VRAM (0x10)</span>
+                <span class="convention-glyphs">Glifos no Cooler: <em>(Numérico)</em> & <strong>%</strong></span>
+              </div>
+              <div class="convention-details">
+                • <strong>Visor Principal:</strong> Taxa de Quadros em Tempo Real (FPS)<br>
+                • <strong>Visor Secundário:</strong> Consumo de Memória de Vídeo VRAM em %
+              </div>
+            </div>
+
+            <div class="convention-rationale">
+              <strong>Racional da Arquitetura do Firmware:</strong> O microcontrolador Semico OEM (USB VID 1A2C / PID 4984) acopla o registrador de Watts (W) no visor secundário exclusivamente ao glifo de Fahrenheit (°F) no visor principal (Byte 4 = <code>0x01</code>). Para exibir a potência da GPU sem queimar ciclos nem sacrificar precisão, o Fulgor PCista transmite a temperatura de Hot Spot em graus Celsius (°C) e adota o glifo físico '°F' como um <em>índice térmico diferenciador de hardware</em>, permitindo identificar de relance se o cooler está exibindo CPU ou GPU.
+            </div>
           </div>
         </div>
 

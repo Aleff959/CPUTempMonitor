@@ -1,0 +1,17 @@
+# ==============================================================================
+# Fulgor PCista - Dependencias de Producao e Compilacao
+# ==============================================================================
+
+# Telemetria de Sistema e Monitoramento de Processos
+psutil==7.2.2
+
+# Interface Grafica Material You via Microsoft Edge WebView2
+pywebview==6.2.1
+
+# Interoperabilidade .NET CLR (LibreHardwareMonitorLib e System.Windows.Forms Tray)
+pythonnet==3.1.0
+clr_loader==0.3.1
+
+# Compilacao e Empacotamento de Binario Autonomo (PyInstaller)
+pyinstaller==6.22.3
+pyinstaller-hooks-contrib==2026.7

@@ -22,10 +22,10 @@ def _sys_ex(tp, val, tb):
 sys.excepthook = _sys_ex
 
 APP_NAME = "Fulgor PCista"
-APP_VERSION = "1.4.0"
-APP_COMP = 21
+APP_VERSION = "1.5.0"
+APP_COMP = 22
 APP_CODENAME = "Ororo"
-WINDOW_TITLE = f"{APP_NAME} (v{APP_VERSION} - {APP_CODENAME})"
+WINDOW_TITLE = f"{APP_NAME} ({APP_VERSION} | Comp. {APP_COMP} - {APP_CODENAME})"
 
 
 class Api:
@@ -60,8 +60,8 @@ class Api:
     def check_updates(self):
         return self._updater.check_for_updates()
 
-    def apply_update(self, download_url=None):
-        return self._updater.apply_update(download_url)
+    def apply_update(self, download_url=None, expected_hash=None):
+        return self._updater.apply_update(download_url, expected_hash)
 
 
 def apply_dark_titlebar():

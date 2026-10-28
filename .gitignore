@@ -20,3 +20,6 @@ Thumbs.db
 
 # Release archives
 *.zip
+
+# Teamwork / Agent artifacts
+.agents/
