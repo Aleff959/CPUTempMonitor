@@ -19,19 +19,19 @@ class TestMilestone5BuildArtifacts(unittest.TestCase):
     """E2E Verification of Milestone 5 build artifacts, checksums, and backup compliance."""
 
     def test_versioning_and_compilation_numbers(self):
-        """Rule 1 & 2: Verify APP_VERSION is 1.5.0 and APP_COMP is 22 across main, updater, and UI."""
+        """Rule 1 & 2: Verify APP_VERSION is 1.5.0 and APP_COMP is 23 across main, updater, and UI."""
         self.assertEqual(main.APP_VERSION, "1.5.0")
-        self.assertEqual(main.APP_COMP, 22)
-        self.assertIn("1.5.0 | Comp. 22", main.WINDOW_TITLE)
+        self.assertEqual(main.APP_COMP, 23)
+        self.assertIn("1.5.0 | Comp. 23", main.WINDOW_TITLE)
 
         updater_default = AppUpdater()
         self.assertEqual(updater_default.current_version, "1.5.0")
-        self.assertEqual(updater_default.current_comp, 22)
+        self.assertEqual(updater_default.current_comp, 23)
 
         index_path = os.path.join(REPO_ROOT, "ui", "index.html")
         with open(index_path, "r", encoding="utf-8") as f:
             html = f.read()
-        self.assertIn("v1.5.0 | Comp. 22", html)
+        self.assertIn("v1.5.0 | Comp. 23", html)
 
     def test_build_backups_in_documents_builds(self):
         """Rule 3: Ensure backups are compressed inside C:\\Users\\Alpha\\Documents\\builds."""
@@ -44,7 +44,7 @@ class TestMilestone5BuildArtifacts(unittest.TestCase):
             info = zf.getinfo("FulgorPCista.exe")
             self.assertGreater(info.file_size, 10_000_000, "Zipped previous executable must be valid size")
 
-        curr_backup_zip = os.path.join(BUILDS_DIR, "FulgorPCista_1.5.0_Comp22.zip")
+        curr_backup_zip = os.path.join(BUILDS_DIR, "FulgorPCista_1.5.0_Comp23.zip")
         self.assertTrue(os.path.isfile(curr_backup_zip), f"Current backup {curr_backup_zip} must exist")
         with zipfile.ZipFile(curr_backup_zip, "r") as zf:
             self.assertIn("FulgorPCista.exe", zf.namelist(), "Current backup zip must contain FulgorPCista.exe")

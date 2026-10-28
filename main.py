@@ -23,7 +23,7 @@ sys.excepthook = _sys_ex
 
 APP_NAME = "Fulgor PCista"
 APP_VERSION = "1.5.0"
-APP_COMP = 22
+APP_COMP = 23
 APP_CODENAME = "Ororo"
 WINDOW_TITLE = f"{APP_NAME} ({APP_VERSION} | Comp. {APP_COMP} - {APP_CODENAME})"
 
