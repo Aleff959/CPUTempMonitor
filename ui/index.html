@@ -151,9 +151,10 @@
       display: inline-flex;
       align-items: center;
       gap: 8px;
-      font-size: 15px;
+      font-size: 13.5px;
       font-weight: 700;
       color: var(--md-sys-color-primary);
+      white-space: nowrap;
     }
 
     .pulse-dot {
@@ -887,7 +888,7 @@
     <div class="app-branding">
       <div class="app-icon">⚡</div>
       <div class="app-title">Fulgor PCista</div>
-      <span class="version-tag">v1.4.0 | Comp. 21</span>
+      <span class="version-tag" onclick="openAboutModal()" style="cursor: pointer;" title="Clique para abrir Sobre e Atualizações">v1.4.0 | Comp. 21</span>
     </div>
     <div class="usb-badge" id="usbStatusBadge">● Visor Digital Conectado</div>
   </div>
@@ -1346,7 +1347,7 @@
         document.getElementById('bannerUnitBadge').style.color = '#ffdcbe';
         document.documentElement.style.setProperty('--md-sys-color-primary', '#ffb77c');
       } else { // FPS & VRAM
-        const bannerTxt = data.in_game ? 'Taxa de Quadros & VRAM (🎮 Jogo Detectado)' : 'Taxa de Quadros & VRAM (FPS / %)';
+        const bannerTxt = data.in_game ? 'Taxa de Quadros & VRAM (🎮 Jogo)' : 'Taxa de Quadros & VRAM';
         document.getElementById('bannerActiveDevice').innerText = bannerTxt;
         document.getElementById('bannerUnitBadge').innerText = 'Marcador do Visor: %';
         document.getElementById('bannerUnitBadge').style.background = '#00472e';
