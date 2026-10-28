@@ -155,6 +155,7 @@ class PresentMonReader:
         self.proc = None
         self.thread = None
         self.running = False
+        self.failed = False
         self.lock = threading.Lock()
         self.recent_presents = []
         self.last_start_time = 0.0
@@ -173,7 +174,7 @@ class PresentMonReader:
 
     def start(self):
         now = time.time()
-        if not self.exe_path or self.running or (now - self.last_start_time < 3.0):
+        if not self.exe_path or self.running or self.failed or (now - self.last_start_time < 30.0):
             return
         self.last_start_time = now
         self.running = True
@@ -183,7 +184,12 @@ class PresentMonReader:
     def _run(self):
         try:
             try:
-                subprocess.run(["logman", "stop", "FulgorPCista_ETW", "-ets"], capture_output=True, timeout=1.0)
+                subprocess.run(
+                    ["logman", "stop", "FulgorPCista_ETW", "-ets"],
+                    capture_output=True,
+                    timeout=1.0,
+                    creationflags=subprocess.CREATE_NO_WINDOW
+                )
             except Exception:
                 pass
 
@@ -226,7 +232,7 @@ class PresentMonReader:
                     while self.recent_presents and self.recent_presents[0] < cutoff:
                         self.recent_presents.pop(0)
         except Exception:
-            pass
+            self.failed = True
         finally:
             self.running = False
             if self.proc:
@@ -236,7 +242,12 @@ class PresentMonReader:
                     pass
                 self.proc = None
             try:
-                subprocess.run(["logman", "stop", "FulgorPCista_ETW", "-ets"], capture_output=True, timeout=1.0)
+                subprocess.run(
+                    ["logman", "stop", "FulgorPCista_ETW", "-ets"],
+                    capture_output=True,
+                    timeout=1.0,
+                    creationflags=subprocess.CREATE_NO_WINDOW
+                )
             except Exception:
                 pass
 
@@ -802,8 +813,8 @@ class MonitorCore:
 
             # Read FPS from RTSS or PresentMon
             cur_fps = self.rtss_reader.read_fps()
-            if cur_fps <= 0.0:
-                if not self.pmon_reader.running:
+            if cur_fps <= 0.0 and not self.rtss_reader.has_rtss_installed:
+                if not self.pmon_reader.running and not self.pmon_reader.failed:
                     self.pmon_reader.start()
                 cur_fps = self.pmon_reader.get_fps()
 
