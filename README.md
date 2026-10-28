@@ -1,6 +1,6 @@
-# ⚡ Fulgor PCista (v1.3.0 - Ororo)
+# ⚡ Fulgor PCista (v1.6.0 - Xango)
 
-[![Versão](https://img.shields.io/badge/vers%C3%A3o-1.3.0--Ororo-00b0ff.svg)](https://github.com/Aleff959/CPUTempMonitor/releases)
+[![Versão](https://img.shields.io/badge/vers%C3%A3o-1.6.0--Xango-00b0ff.svg)](https://github.com/Aleff959/CPUTempMonitor/releases)
 [![Plataforma](https://img.shields.io/badge/plataforma-Windows%2011%20%7C%2010-0078D6.svg)](https://github.com/Aleff959/CPUTempMonitor)
 [![Licença](https://img.shields.io/badge/licen%C3%A7a-MIT-green.svg)](LICENSE)
 [![Design](https://img.shields.io/badge/estilo-Material%20You%20Dark-111418.svg)](https://github.com/Aleff959/CPUTempMonitor)

@@ -22,14 +22,14 @@ def _sys_ex(tp, val, tb):
 sys.excepthook = _sys_ex
 
 APP_NAME = "Fulgor PCista"
-APP_VERSION = "1.5.0"
-APP_COMP = 23
-APP_CODENAME = "Ororo"
+APP_VERSION = "1.6.0"
+APP_COMP = 24
+APP_CODENAME = "Xango"
 WINDOW_TITLE = f"{APP_NAME} ({APP_VERSION} | Comp. {APP_COMP} - {APP_CODENAME})"
 
 
 class Api:
-    def __init__(self, core: MonitorCore):
+    def __init__(self, core):
         self._core = core
         self._updater = AppUpdater(current_version=APP_VERSION, current_comp=APP_COMP)
 
@@ -47,6 +47,14 @@ class Api:
     def set_auto_switch(self, enabled):
         self._core.set_auto_switch(enabled)
         return True
+
+    def get_service_status(self):
+        from service_bridge import get_boot_service_status
+        return get_boot_service_status()
+
+    def enable_boot_service(self):
+        from service_bridge import install_boot_service
+        return install_boot_service()
 
     def open_url(self, url):
         import webbrowser
@@ -280,9 +288,21 @@ class WinFormsTrayManager:
 
 
 def main():
-    start_hidden = "-hide" in sys.argv or "--hide" in sys.argv
+    args_lower = [a.lower() for a in sys.argv[1:]]
+    if "-service" in args_lower or "--service" in args_lower:
+        from service_bridge import run_windows_service
+        run_windows_service()
+        return
 
-    core = MonitorCore()
+    if "-daemon" in args_lower or "--daemon" in args_lower:
+        from service_bridge import run_headless_daemon
+        run_headless_daemon()
+        return
+
+    start_hidden = "-hide" in args_lower or "--hide" in args_lower
+
+    from service_bridge import HybridCoreProxy
+    core = HybridCoreProxy()
     api = Api(core)
 
     html_path = get_resource_path(os.path.join("ui", "index.html"))

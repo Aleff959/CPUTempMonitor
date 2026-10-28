@@ -1007,7 +1007,7 @@
     <div class="app-branding">
       <div class="app-icon">⚡</div>
       <div class="app-title">Fulgor PCista</div>
-      <span class="version-tag" onclick="openAboutModal()" style="cursor: pointer;" title="Clique para abrir Sobre e Atualizações">v1.5.0 | Comp. 23</span>
+      <span class="version-tag" onclick="openAboutModal()" style="cursor: pointer;" title="Clique para abrir Sobre e Atualizações">v1.6.0 | Comp. 24</span>
     </div>
     <div class="usb-badge" id="usbStatusBadge">● Visor Digital Conectado</div>
   </div>
@@ -1184,7 +1184,7 @@
           <div class="modal-icon">⚡</div>
           <div>
             <div class="modal-title">Fulgor PCista</div>
-            <div class="modal-subtitle">v1.5.0 (Ororo) • Comp. 23</div>
+            <div class="modal-subtitle">v1.6.0 (Xango) • Comp. 24</div>
           </div>
         </div>
         <button class="modal-close-btn" onclick="closeAboutModal()" title="Fechar">✕</button>
@@ -1197,7 +1197,7 @@
           <div class="updater-card">
             <div class="updater-status-row">
               <div class="updater-info">
-                <span class="updater-version-label" id="updaterVersionLbl">Versão instalada: v1.5.0 (Comp. 23)</span>
+                <span class="updater-version-label" id="updaterVersionLbl">Versão instalada: v1.6.0 (Comp. 24)</span>
                 <span class="updater-status-sub" id="updaterStatusSub">Pronto para buscar novas atualizações no GitHub</span>
               </div>
               <button class="btn-check-update" id="btnCheckUpdate" onclick="triggerCheckUpdates()">
@@ -1205,6 +1205,22 @@
               </button>
             </div>
             <div id="updaterActionArea" style="display: none; margin-top: 8px;"></div>
+          </div>
+        </div>
+
+        <!-- Serviço de Inicialização Pré-Logon (Nível 2) -->
+        <div class="about-sec">
+          <span class="about-sec-lbl">⚡ Inicialização Instantânea (Serviço Pré-Logon)</span>
+          <div class="updater-card">
+            <div class="updater-status-row">
+              <div class="updater-info">
+                <span class="updater-version-label" id="bootServiceLbl">Motor de Telemetria no Boot (1ª Tela do Windows)</span>
+                <span class="updater-status-sub" id="bootServiceSub">Liga o visor digital do cooler já na tela de bloqueio antes mesmo do login</span>
+              </div>
+              <button class="btn-check-update" id="btnEnableBootService" onclick="triggerEnableBootService()">
+                <span>⚡</span> Ativar Boot
+              </button>
+            </div>
           </div>
         </div>
 
@@ -1324,6 +1340,7 @@
     function openAboutModal() {
       const modal = document.getElementById('aboutModal');
       if (modal) modal.classList.add('open');
+      refreshBootServiceStatus();
     }
 
     function closeAboutModal(e) {
@@ -1351,6 +1368,55 @@
     function onAutoSwitchChanged(checked) {
       if (window.pywebview && window.pywebview.api && window.pywebview.api.set_auto_switch) {
         pywebview.api.set_auto_switch(checked).catch(() => {});
+      }
+    }
+
+    async function refreshBootServiceStatus() {
+      const sub = document.getElementById('bootServiceSub');
+      const btn = document.getElementById('btnEnableBootService');
+      if (!sub || !btn) return;
+      if (window.pywebview && window.pywebview.api && window.pywebview.api.get_service_status) {
+        try {
+          const st = await pywebview.api.get_service_status();
+          if (st && (st.service_running || st.boot_registered)) {
+            sub.innerText = '✅ Serviço Pré-Logon Ativo (Inicia junto com a 1ª tela do Windows)';
+            sub.style.color = '#81c784';
+            btn.innerText = '🔄 Reconfigurar';
+          }
+        } catch (e) {}
+      }
+    }
+
+    async function triggerEnableBootService() {
+      const btn = document.getElementById('btnEnableBootService');
+      const sub = document.getElementById('bootServiceSub');
+      if (btn) {
+        btn.disabled = true;
+        btn.innerText = 'Configurando...';
+      }
+      if (window.pywebview && window.pywebview.api && window.pywebview.api.enable_boot_service) {
+        try {
+          const res = await pywebview.api.enable_boot_service();
+          if (btn) btn.disabled = false;
+          if (res && res.success) {
+            if (sub) {
+              sub.innerText = '✅ Serviço Pré-Logon Ativo (Inicia junto com a 1ª tela do Windows)';
+              sub.style.color = '#81c784';
+            }
+            if (btn) btn.innerText = '✅ Ativado';
+          } else {
+            if (sub) {
+              sub.innerText = '⚠️ Falha ao configurar serviço: ' + ((res && res.error) || 'Permissão negada');
+              sub.style.color = '#ffb77c';
+            }
+            if (btn) btn.innerText = '⚡ Ativar Boot';
+          }
+        } catch (e) {
+          if (btn) {
+            btn.disabled = false;
+            btn.innerText = '⚡ Ativar Boot';
+          }
+        }
       }
     }
 

@@ -97,7 +97,11 @@ class RTSSReader:
                 pass
 
     def read_fps(self):
-        h_map = kernel32.OpenFileMappingW(FILE_MAP_READ, False, "RTSSSharedMemoryV2")
+        h_map = None
+        for map_name in ("RTSSSharedMemoryV2", "Global\\RTSSSharedMemoryV2", "Local\\RTSSSharedMemoryV2"):
+            h_map = kernel32.OpenFileMappingW(FILE_MAP_READ, False, map_name)
+            if h_map:
+                break
         if not h_map:
             self.try_launch_rtss()
             return 0.0
@@ -345,11 +349,16 @@ class MonitorCore:
         self.game_idle_samples = 0
         self._last_proc_scan = 0.0
         self._last_game_proc_detected = False
+        self._ext_fps = 0.0
+        self._ext_in_game = False
+        self._ext_update_time = 0.0
 
         self.server_proc = None
         self.hid_handle = None
         self.server_dir = self._find_server_dir()
         self.lhm_gpu = None
+        self.lhm_cpu = None
+        self.lhm_mb = None
         self.lhm_comp = None
         self.rtss_reader = RTSSReader()
         self.pmon_reader = PresentMonReader()
@@ -400,16 +409,24 @@ class MonitorCore:
             import LibreHardwareMonitor.Hardware as LHM
 
             comp = LHM.Computer()
+            comp.IsCpuEnabled = True
             comp.IsGpuEnabled = True
+            comp.IsMotherboardEnabled = True
             comp.Open()
 
+            self.lhm_comp = comp
             for hw in comp.Hardware:
-                if "gpu" in str(hw.HardwareType).lower():
+                hw_type = str(hw.HardwareType).lower()
+                if "gpu" in hw_type:
                     self.lhm_gpu = hw
-                    self.lhm_comp = comp
-                    break
+                elif "cpu" in hw_type:
+                    self.lhm_cpu = hw
+                elif "motherboard" in hw_type:
+                    self.lhm_mb = hw
         except Exception:
             self.lhm_gpu = None
+            self.lhm_cpu = None
+            self.lhm_mb = None
             self.lhm_comp = None
 
     def _find_server_dir(self):
@@ -450,14 +467,12 @@ class MonitorCore:
             except Exception:
                 pass
 
-        # Stop any leftover non-admin fallback process so the elevated server can take over
+        # Stop any leftover non-admin or cross-session server process so our session's server can map shared memory
         for p in psutil.process_iter(["name"]):
             try:
                 pname = (p.info["name"] or "").lower()
-                if "openhardwaremonitorserver_user" in pname:
+                if "openhardwaremonitorserver" in pname:
                     p.kill()
-                elif "openhardwaremonitorserver" in pname:
-                    return
             except Exception:
                 pass
 
@@ -512,7 +527,11 @@ class MonitorCore:
 
     def _read_shared_memory(self):
         """Read 1024-byte SYSTEM_INFO from xinyao_hardware_mapfile using OpenFileMappingW."""
-        h_map = kernel32.OpenFileMappingW(FILE_MAP_READ, False, "xinyao_hardware_mapfile")
+        h_map = None
+        for map_name in ("xinyao_hardware_mapfile", "Global\\xinyao_hardware_mapfile", "Local\\xinyao_hardware_mapfile"):
+            h_map = kernel32.OpenFileMappingW(FILE_MAP_READ, False, map_name)
+            if h_map:
+                break
         if not h_map:
             return None
         try:
@@ -754,6 +773,13 @@ class MonitorCore:
     def set_mode(self, mode: str, interval: float = 5.0):
         return self.set_device(mode)
 
+    def update_external_session_metrics(self, fps: float, in_game: bool):
+        with self.lock:
+            self._ext_fps = float(fps)
+            self._ext_in_game = bool(in_game)
+            self._ext_update_time = time.time()
+        return True
+
     def _worker_loop(self):
         self._ensure_internal_server()
         while self.running:
@@ -787,7 +813,7 @@ class MonitorCore:
             except Exception:
                 pass
 
-        # 2. Direct NVAPI Hot Spot, GPU & VRAM telemetry from LibreHardwareMonitor
+        # 2. Direct NVAPI Hot Spot, GPU, CPU & VRAM telemetry from LibreHardwareMonitor
         lhm_hotspot = 0.0
         lhm_core = 0.0
         lhm_pwr = 0.0
@@ -795,6 +821,40 @@ class MonitorCore:
         lhm_vram_load = 0.0
         lhm_vram_used = 0.0
         lhm_vram_total = 0.0
+
+        if self.lhm_cpu:
+            try:
+                self.lhm_cpu.Update()
+                for s in self.lhm_cpu.Sensors:
+                    stype = str(s.SensorType).lower()
+                    sname = str(s.Name).lower()
+                    val = float(s.Value) if s.Value is not None else 0.0
+                    if val > 0.0:
+                        if "temperature" in stype and cpu_temp <= 0.0:
+                            if "tctl" in sname or "tdie" in sname or "package" in sname or "core" in sname:
+                                cpu_temp = val
+                        elif "power" in stype and cpu_pwr <= 0.0:
+                            if "package" in sname or "cores" in sname:
+                                cpu_pwr = val
+                        elif "load" in stype and cpu_load <= 0.0:
+                            if "total" in sname:
+                                cpu_load = val
+            except Exception:
+                pass
+
+        if self.lhm_mb and mb_temp <= 0.0:
+            try:
+                self.lhm_mb.Update()
+                for sub in self.lhm_mb.SubHardware:
+                    sub.Update()
+                    for s in sub.Sensors:
+                        if "temperature" in str(s.SensorType).lower() and s.Value is not None:
+                            v = float(s.Value)
+                            if 15.0 < v < 115.0:
+                                mb_temp = v
+                                break
+            except Exception:
+                pass
 
         if self.lhm_gpu:
             try:
@@ -857,9 +917,11 @@ class MonitorCore:
         final_vram_used = lhm_vram_used if lhm_vram_used > 0 else nv_vram_used
         final_vram_total = lhm_vram_total if lhm_vram_total > 0 else nv_vram_total
 
-        # Read FPS from RTSS or PresentMon
+        # Read FPS from RTSS or PresentMon (or external user-session bridge if running in Session 0)
         cur_fps = self.rtss_reader.read_fps()
-        if cur_fps <= 0.0 and not self.rtss_reader.has_rtss_installed:
+        if cur_fps <= 0.0 and (now - self._ext_update_time < 3.0) and self._ext_fps > 0.0:
+            cur_fps = self._ext_fps
+        elif cur_fps <= 0.0 and not self.rtss_reader.has_rtss_installed:
             if not self.pmon_reader.running and not self.pmon_reader.failed:
                 self.pmon_reader.start()
             cur_fps = self.pmon_reader.get_fps()
@@ -881,7 +943,8 @@ class MonitorCore:
         else:
             is_game_proc = self._last_game_proc_detected
 
-        is_in_game = is_rendering_fps or (is_game_proc and cur_fps > 0.0)
+        ext_game = (now - self._ext_update_time < 3.0) and self._ext_in_game
+        is_in_game = is_rendering_fps or (is_game_proc and cur_fps > 0.0) or ext_game
 
         # 3. Update state quickly under lock
         with self.lock:
