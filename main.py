@@ -23,8 +23,8 @@ sys.excepthook = _sys_ex
 
 APP_NAME = "Fulgor PCista"
 APP_VERSION = "1.6.0"
-APP_COMP = 24
-APP_CODENAME = "Xango"
+APP_COMP = 25
+APP_CODENAME = "Yoruichi"
 WINDOW_TITLE = f"{APP_NAME} ({APP_VERSION} | Comp. {APP_COMP} - {APP_CODENAME})"
 
 
@@ -287,6 +287,62 @@ class WinFormsTrayManager:
         apply_dark_titlebar()
 
 
+_single_instance_mutex = None
+
+
+def _cleanup_legacy_and_stale_processes():
+    """Terminate any legacy/stale UI instances (e.g. from older compilations without single-instance mutex) and purge .old files."""
+    try:
+        import psutil
+        my_pid = os.getpid()
+        parent_pid = os.getppid()
+        for p in psutil.process_iter(["pid", "name", "cmdline"]):
+            try:
+                pid = p.info["pid"]
+                if pid in (my_pid, parent_pid):
+                    continue
+                pname = (p.info["name"] or "").lower()
+                if "fulgorpcista" in pname or "cputempmonitor" in pname:
+                    cmdline = [str(c).lower() for c in (p.info.get("cmdline") or [])]
+                    if "-daemon" in cmdline or "--daemon" in cmdline or "-service" in cmdline or "--service" in cmdline:
+                        continue
+                    p.kill()
+            except Exception:
+                pass
+    except Exception:
+        pass
+
+    try:
+        if getattr(sys, "frozen", False):
+            exe_dir = os.path.dirname(sys.executable)
+            for fname in os.listdir(exe_dir):
+                if ".old" in fname.lower() or ".del_" in fname.lower():
+                    try:
+                        os.remove(os.path.join(exe_dir, fname))
+                    except Exception:
+                        pass
+    except Exception:
+        pass
+
+
+def ensure_single_ui_instance():
+    """Ensure only 1 UI/Tray instance runs per user session. If already running, bring its window to front and exit."""
+    global _single_instance_mutex
+    kernel32 = ctypes.windll.kernel32
+    user32 = ctypes.windll.user32
+    mutex_name = "Local\\FulgorPCista_UI_SingleInstance_Mutex"
+    _single_instance_mutex = kernel32.CreateMutexW(None, False, mutex_name)
+    if kernel32.GetLastError() == 183:  # ERROR_ALREADY_EXISTS
+        logging.info("Another UI instance of Fulgor PCista is already running. Activating existing window and exiting.")
+        hwnd = user32.FindWindowW(None, WINDOW_TITLE)
+        if hwnd:
+            user32.ShowWindow(hwnd, 9)  # SW_RESTORE
+            user32.SetForegroundWindow(hwnd)
+        return False
+    _cleanup_legacy_and_stale_processes()
+    return True
+
+
 def main():
     args_lower = [a.lower() for a in sys.argv[1:]]
     if "-service" in args_lower or "--service" in args_lower:
@@ -297,6 +353,9 @@ def main():
     if "-daemon" in args_lower or "--daemon" in args_lower:
         from service_bridge import run_headless_daemon
         run_headless_daemon()
+        return
+
+    if not ensure_single_ui_instance():
         return
 
     start_hidden = "-hide" in args_lower or "--hide" in args_lower
