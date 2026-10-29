@@ -12,28 +12,28 @@ EXE_PATH = os.path.join(DIST_DIR, "FulgorPCista.exe")
 SHA256_FILE = os.path.join(DIST_DIR, "FulgorPCista.exe.sha256")
 SHA256SUMS_FILE = os.path.join(DIST_DIR, "SHA256SUMS")
 BUILDS_DIR = r"C:\Users\Alpha\Documents\builds"
-PREV_BACKUP_ZIP = os.path.join(BUILDS_DIR, "FulgorPCista_1.6.0_Comp24.zip")
+PREV_BACKUP_ZIP = os.path.join(BUILDS_DIR, "FulgorPCista_1.6.0_Comp25.zip")
 
 
 class TestMilestone5BuildArtifacts(unittest.TestCase):
     """E2E Verification of Milestone 5 build artifacts, checksums, and backup compliance."""
 
     def test_versioning_and_compilation_numbers(self):
-        """Rule 1 & 2: Verify APP_VERSION is 1.6.0, APP_COMP is 25, and APP_CODENAME is Yoruichi across main, updater, and UI."""
-        self.assertEqual(main.APP_VERSION, "1.6.0")
-        self.assertEqual(main.APP_COMP, 25)
-        self.assertEqual(main.APP_CODENAME, "Yoruichi")
-        self.assertIn("1.6.0 | Comp. 25 - Yoruichi", main.WINDOW_TITLE)
+        """Rule 1 & 2: Verify APP_VERSION is 1.7.0, APP_COMP is 26, and APP_CODENAME is Zeus across main, updater, and UI."""
+        self.assertEqual(main.APP_VERSION, "1.7.0")
+        self.assertEqual(main.APP_COMP, 26)
+        self.assertEqual(main.APP_CODENAME, "Zeus")
+        self.assertIn("1.7.0 | Comp. 26 - Zeus", main.WINDOW_TITLE)
 
         updater_default = AppUpdater()
-        self.assertEqual(updater_default.current_version, "1.6.0")
-        self.assertEqual(updater_default.current_comp, 25)
+        self.assertEqual(updater_default.current_version, "1.7.0")
+        self.assertEqual(updater_default.current_comp, 26)
 
         index_path = os.path.join(REPO_ROOT, "ui", "index.html")
         with open(index_path, "r", encoding="utf-8") as f:
             html = f.read()
-        self.assertIn("v1.6.0 | Comp. 25", html)
-        self.assertIn("v1.6.0 (Yoruichi) • Comp. 25", html)
+        self.assertIn("v1.7.0 | Comp. 26", html)
+        self.assertIn("v1.7.0 (Zeus) • Comp. 26", html)
 
     def test_build_backups_in_documents_builds(self):
         """Rule 3: Ensure backups are compressed inside C:\\Users\\Alpha\\Documents\\builds."""
@@ -46,7 +46,7 @@ class TestMilestone5BuildArtifacts(unittest.TestCase):
             info = zf.getinfo("FulgorPCista.exe")
             self.assertGreater(info.file_size, 10_000_000, "Zipped previous executable must be valid size")
 
-        curr_backup_zip = os.path.join(BUILDS_DIR, "FulgorPCista_1.6.0_Comp25.zip")
+        curr_backup_zip = os.path.join(BUILDS_DIR, "FulgorPCista_1.7.0_Comp26.zip")
         self.assertTrue(os.path.isfile(curr_backup_zip), f"Current backup {curr_backup_zip} must exist")
         with zipfile.ZipFile(curr_backup_zip, "r") as zf:
             self.assertIn("FulgorPCista.exe", zf.namelist(), "Current backup zip must contain FulgorPCista.exe")

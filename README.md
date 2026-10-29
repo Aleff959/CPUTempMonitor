@@ -1,6 +1,6 @@
-# ⚡ Fulgor PCista (v1.6.0 - Yoruichi)
+# ⚡ Fulgor PCista (v1.7.0 - Zeus)
 
-[![Versão](https://img.shields.io/badge/vers%C3%A3o-1.6.0--Yoruichi-00b0ff.svg)](https://github.com/Aleff959/CPUTempMonitor/releases)
+[![Versão](https://img.shields.io/badge/vers%C3%A3o-1.7.0--Zeus-00b0ff.svg)](https://github.com/Aleff959/CPUTempMonitor/releases)
 [![Plataforma](https://img.shields.io/badge/plataforma-Windows%2011%20%7C%2010-0078D6.svg)](https://github.com/Aleff959/CPUTempMonitor)
 [![Licença](https://img.shields.io/badge/licen%C3%A7a-MIT-green.svg)](LICENSE)
 [![Design](https://img.shields.io/badge/estilo-Material%20You%20Dark-111418.svg)](https://github.com/Aleff959/CPUTempMonitor)

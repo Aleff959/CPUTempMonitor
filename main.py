@@ -22,9 +22,9 @@ def _sys_ex(tp, val, tb):
 sys.excepthook = _sys_ex
 
 APP_NAME = "Fulgor PCista"
-APP_VERSION = "1.6.0"
-APP_COMP = 25
-APP_CODENAME = "Yoruichi"
+APP_VERSION = "1.7.0"
+APP_COMP = 26
+APP_CODENAME = "Zeus"
 WINDOW_TITLE = f"{APP_NAME} ({APP_VERSION} | Comp. {APP_COMP} - {APP_CODENAME})"
 
 
@@ -137,6 +137,14 @@ class WinFormsTrayManager:
                 self.form.Visible = True
                 self.form.ShowInTaskbar = True
                 self.form.WindowState = WinForms.FormWindowState.Normal
+                if hasattr(self.form, "browser") and hasattr(self.form.browser, "webview"):
+                    try:
+                        self.form.browser.webview.Visible = True
+                        self.form.browser.webview.Dock = WinForms.DockStyle.Fill
+                        self.form.browser.webview.BringToFront()
+                        self.form.browser.webview.Focus()
+                    except Exception:
+                        pass
                 self.form.BringToFront()
                 self.form.Activate()
                 self.form.Invalidate(True)
@@ -286,6 +294,19 @@ class WinFormsTrayManager:
     def on_shown(self):
         apply_dark_titlebar()
 
+    def listen_show_event(self):
+        """Listen for activation signal from subsequent process launches to properly restore and focus UI."""
+        kernel32 = ctypes.windll.kernel32
+        event_name = "Local\\FulgorPCista_ShowUI_Event"
+        ev = kernel32.CreateEventW(None, False, False, event_name)
+        while not self.is_quitting:
+            res = kernel32.WaitForSingleObject(ev, 800)
+            if res == 0:  # WAIT_OBJECT_0
+                logging.info("listen_show_event: received show signal from another instance.")
+                self.show_window()
+        if ev:
+            kernel32.CloseHandle(ev)
+
 
 _single_instance_mutex = None
 
@@ -326,14 +347,19 @@ def _cleanup_legacy_and_stale_processes():
 
 
 def ensure_single_ui_instance():
-    """Ensure only 1 UI/Tray instance runs per user session. If already running, bring its window to front and exit."""
+    """Ensure only 1 UI/Tray instance runs per user session. If already running, signal existing instance to show and exit."""
     global _single_instance_mutex
     kernel32 = ctypes.windll.kernel32
     user32 = ctypes.windll.user32
     mutex_name = "Local\\FulgorPCista_UI_SingleInstance_Mutex"
     _single_instance_mutex = kernel32.CreateMutexW(None, False, mutex_name)
     if kernel32.GetLastError() == 183:  # ERROR_ALREADY_EXISTS
-        logging.info("Another UI instance of Fulgor PCista is already running. Activating existing window and exiting.")
+        logging.info("Another UI instance of Fulgor PCista is already running. Signaling existing window to restore and exiting.")
+        event_name = "Local\\FulgorPCista_ShowUI_Event"
+        ev = kernel32.OpenEventW(0x0002, False, event_name)  # EVENT_MODIFY_STATE
+        if ev:
+            kernel32.SetEvent(ev)
+            kernel32.CloseHandle(ev)
         hwnd = user32.FindWindowW(None, WINDOW_TITLE)
         if hwnd:
             user32.ShowWindow(hwnd, 9)  # SW_RESTORE
@@ -389,6 +415,7 @@ def main():
     window.events.loaded += tray.on_loaded
 
     threading.Thread(target=tray.setup_tray, daemon=True).start()
+    threading.Thread(target=tray.listen_show_event, daemon=True).start()
 
     logging.info(f"main: start_hidden={start_hidden}, launching webview.start()...")
     try:

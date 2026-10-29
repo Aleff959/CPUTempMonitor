@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Fulgor PCista (v1.6.0 - Yoruichi)</title>
+  <title>Fulgor PCista (v1.7.0 - Zeus)</title>
   <style>
     :root {
       --md-sys-color-primary: #80d4ff;
@@ -113,7 +113,11 @@
     .display-status-banner {
       background: var(--md-sys-color-surface-container);
       border-radius: 16px;
-      padding: 12px 18px;
+      padding: 14px 18px;
+      min-height: 66px;
+      height: 66px;
+      box-sizing: border-box;
+      flex-shrink: 0;
       display: flex;
       align-items: center;
       justify-content: space-between;
@@ -136,22 +140,27 @@
     .banner-left {
       display: flex;
       flex-direction: column;
-      gap: 3px;
+      gap: 4px;
+      justify-content: center;
+      overflow: visible;
     }
 
     .banner-label {
-      font-size: 10px;
+      font-size: 10.5px;
+      line-height: 1.25;
       text-transform: uppercase;
       letter-spacing: 0.9px;
       color: var(--md-sys-color-outline);
       font-weight: 700;
+      white-space: nowrap;
     }
 
     .banner-active-pill {
       display: inline-flex;
       align-items: center;
       gap: 8px;
-      font-size: 13.5px;
+      font-size: 14px;
+      line-height: 1.35;
       font-weight: 700;
       color: var(--md-sys-color-primary);
       white-space: nowrap;
@@ -1036,7 +1045,7 @@
     <div class="app-branding">
       <div class="app-icon">⚡</div>
       <div class="app-title">Fulgor PCista</div>
-      <span class="version-tag" onclick="openAboutModal()" style="cursor: pointer;" title="Clique para abrir Sobre e Atualizações">v1.6.0 | Comp. 25</span>
+      <span class="version-tag" onclick="openAboutModal()" style="cursor: pointer;" title="Clique para abrir Sobre e Atualizações">v1.7.0 | Comp. 26</span>
     </div>
     <div class="usb-badge" id="usbStatusBadge">● Visor Digital Conectado</div>
   </div>
@@ -1224,7 +1233,7 @@
           <div class="modal-icon">⚡</div>
           <div>
             <div class="modal-title">Fulgor PCista</div>
-            <div class="modal-subtitle">v1.6.0 (Yoruichi) • Comp. 25</div>
+            <div class="modal-subtitle">v1.7.0 (Zeus) • Comp. 26</div>
           </div>
         </div>
         <button class="modal-close-btn" onclick="closeAboutModal()" title="Fechar">✕</button>
@@ -1237,7 +1246,7 @@
           <div class="updater-card">
             <div class="updater-status-row">
               <div class="updater-info">
-                <span class="updater-version-label" id="updaterVersionLbl">Versão instalada: v1.6.0 (Comp. 25)</span>
+                <span class="updater-version-label" id="updaterVersionLbl">Versão instalada: v1.7.0 (Comp. 26)</span>
                 <span class="updater-status-sub" id="updaterStatusSub">Pronto para buscar novas atualizações no GitHub</span>
               </div>
               <button class="btn-check-update" id="btnCheckUpdate" onclick="triggerCheckUpdates()">
