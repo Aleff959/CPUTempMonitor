@@ -4,7 +4,6 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Fulgor PCista (v1.6.0 - Yoruichi)</title>
-  <link id="themeStylesheet" rel="stylesheet" href="">
   <style>
     :root {
       --md-sys-color-primary: #80d4ff;
@@ -1030,6 +1029,7 @@
       box-shadow: 0 0 6px #69f0ae;
     }
   </style>
+  <link id="themeStylesheet" rel="stylesheet" href="">
 </head>
 <body>
   <div class="titlebar">
@@ -1202,11 +1202,11 @@
       <div class="theme-selector-wrap" title="Escolha o tema visual do Fulgor PCista">
         <span>🎨</span>
         <select id="themeSelect" class="theme-select" onchange="changeTheme(this.value)">
-          <option value="default">Material You (Azul Padrão)</option>
           <option value="ambar">Âmbar Industrial (IBM Plex)</option>
           <option value="terracota">Terracota & Areia (Manrope)</option>
           <option value="terminal">Terminal Matrix (JetBrains Mono)</option>
           <option value="synthwave">Synthwave Neon (Outfit)</option>
+          <option value="default">Material You Clássico</option>
         </select>
       </div>
 
@@ -1378,25 +1378,38 @@
     }
 
     const themeFiles = {
-      default: '',
       ambar: 'themes/tema-ambar.css',
       terracota: 'themes/tema-manrope-terracota.css',
       terminal: 'themes/tema-terminal-matrix.css',
-      synthwave: 'themes/tema-synthwave-neon.css'
+      synthwave: 'themes/tema-synthwave-neon.css',
+      default: ''
     };
 
+    let currentThemeKey = 'ambar';
+
     function changeTheme(themeKey) {
+      if (!themeFiles.hasOwnProperty(themeKey)) {
+        themeKey = 'ambar';
+      }
+      currentThemeKey = themeKey;
       const link = document.getElementById('themeStylesheet');
-      if (!link) return;
-      const file = themeFiles[themeKey] || '';
-      link.href = file;
+      if (link) {
+        link.href = themeFiles[themeKey] || '';
+      }
       localStorage.setItem('fulgor_theme', themeKey);
       const sel = document.getElementById('themeSelect');
       if (sel) sel.value = themeKey;
+
+      // Clean up any inline overrides on bannerUnitBadge so theme CSS rules take effect
+      const badge = document.getElementById('bannerUnitBadge');
+      if (badge && themeKey !== 'default') {
+        badge.style.background = '';
+        badge.style.color = '';
+      }
     }
 
     function initTheme() {
-      const saved = localStorage.getItem('fulgor_theme') || 'default';
+      const saved = localStorage.getItem('fulgor_theme') || 'ambar';
       changeTheme(saved);
     }
 
@@ -1639,23 +1652,38 @@
       if (active === 'CPU') {
         document.getElementById('bannerActiveDevice').innerText = 'Processador (CPU)';
         document.getElementById('bannerUnitBadge').innerText = 'Marcador do Visor: °C';
-        document.getElementById('bannerUnitBadge').style.background = '#004d6a';
-        document.getElementById('bannerUnitBadge').style.color = '#c4e7ff';
-        document.documentElement.style.setProperty('--md-sys-color-primary', '#80d4ff');
+        if (currentThemeKey === 'default') {
+          document.getElementById('bannerUnitBadge').style.background = '#004d6a';
+          document.getElementById('bannerUnitBadge').style.color = '#c4e7ff';
+          document.documentElement.style.setProperty('--md-sys-color-primary', '#80d4ff');
+        } else {
+          document.getElementById('bannerUnitBadge').style.background = '';
+          document.getElementById('bannerUnitBadge').style.color = '';
+        }
       } else if (active === 'GPU') {
         document.getElementById('bannerActiveDevice').innerText = 'Placa de Vídeo (GPU Hot Spot)';
         document.getElementById('bannerUnitBadge').innerText = 'Temperatura: °C (Visor: °F/W)';
         document.getElementById('bannerUnitBadge').title = 'Convenção do visor físico: o protocolo do microcontrolador liga o glifo W ao glifo °F. O valor numérico medido e exibido é sempre em Celsius (°C).';
-        document.getElementById('bannerUnitBadge').style.background = '#4a2800';
-        document.getElementById('bannerUnitBadge').style.color = '#ffdcbe';
-        document.documentElement.style.setProperty('--md-sys-color-primary', '#ffb77c');
+        if (currentThemeKey === 'default') {
+          document.getElementById('bannerUnitBadge').style.background = '#4a2800';
+          document.getElementById('bannerUnitBadge').style.color = '#ffdcbe';
+          document.documentElement.style.setProperty('--md-sys-color-primary', '#ffb77c');
+        } else {
+          document.getElementById('bannerUnitBadge').style.background = '';
+          document.getElementById('bannerUnitBadge').style.color = '';
+        }
       } else { // FPS & VRAM
         const bannerTxt = data.in_game ? 'Taxa de Quadros & VRAM (🎮 Jogo)' : 'Taxa de Quadros & VRAM';
         document.getElementById('bannerActiveDevice').innerText = bannerTxt;
         document.getElementById('bannerUnitBadge').innerText = 'Marcador do Visor: %';
-        document.getElementById('bannerUnitBadge').style.background = '#00472e';
-        document.getElementById('bannerUnitBadge').style.color = '#69f0ae';
-        document.documentElement.style.setProperty('--md-sys-color-primary', '#69f0ae');
+        if (currentThemeKey === 'default') {
+          document.getElementById('bannerUnitBadge').style.background = '#00472e';
+          document.getElementById('bannerUnitBadge').style.color = '#69f0ae';
+          document.documentElement.style.setProperty('--md-sys-color-primary', '#69f0ae');
+        } else {
+          document.getElementById('bannerUnitBadge').style.background = '';
+          document.getElementById('bannerUnitBadge').style.color = '';
+        }
       }
     }
 
