@@ -3,7 +3,8 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Fulgor PCista (v1.4.0 - Ororo)</title>
+  <title>Fulgor PCista (v1.6.0 - Yoruichi)</title>
+  <link id="themeStylesheet" rel="stylesheet" href="">
   <style>
     :root {
       --md-sys-color-primary: #80d4ff;
@@ -540,12 +541,40 @@
       line-height: 1.4;
     }
 
-    /* Footer Bar with "Sobre" Button */
+    /* Footer Bar with Theme Selector and "Sobre" Button */
     .footer-bar {
       display: flex;
       align-items: center;
-      justify-content: flex-end;
+      justify-content: space-between;
       padding: 2px 2px 0 2px;
+    }
+
+    .theme-selector-wrap {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      padding: 3px 8px;
+      border-radius: 14px;
+      font-size: 11px;
+      color: var(--md-sys-color-outline);
+    }
+
+    .theme-select {
+      background: transparent;
+      border: none;
+      color: var(--md-sys-color-on-surface);
+      font-family: inherit;
+      font-size: 11px;
+      font-weight: 600;
+      outline: none;
+      cursor: pointer;
+    }
+
+    .theme-select option {
+      background: #1b1f24;
+      color: #e1e2e8;
     }
 
     .btn-about {
@@ -1168,8 +1197,19 @@
       </div>
     </div>
 
-    <!-- Footer Bar with "Sobre" aligned to the right (red box) -->
+    <!-- Footer Bar with Themes and "Sobre" -->
     <div class="footer-bar">
+      <div class="theme-selector-wrap" title="Escolha o tema visual do Fulgor PCista">
+        <span>🎨</span>
+        <select id="themeSelect" class="theme-select" onchange="changeTheme(this.value)">
+          <option value="default">Material You (Azul Padrão)</option>
+          <option value="ambar">Âmbar Industrial (IBM Plex)</option>
+          <option value="terracota">Terracota & Areia (Manrope)</option>
+          <option value="terminal">Terminal Matrix (JetBrains Mono)</option>
+          <option value="synthwave">Synthwave Neon (Outfit)</option>
+        </select>
+      </div>
+
       <button class="btn-about" onclick="openAboutModal()" title="Informações e créditos do aplicativo">
         <span>ℹ️</span> Sobre
       </button>
@@ -1336,6 +1376,31 @@
         pywebview.api.set_mode(currentDevice).catch(() => {});
       }
     }
+
+    const themeFiles = {
+      default: '',
+      ambar: 'themes/tema-ambar.css',
+      terracota: 'themes/tema-manrope-terracota.css',
+      terminal: 'themes/tema-terminal-matrix.css',
+      synthwave: 'themes/tema-synthwave-neon.css'
+    };
+
+    function changeTheme(themeKey) {
+      const link = document.getElementById('themeStylesheet');
+      if (!link) return;
+      const file = themeFiles[themeKey] || '';
+      link.href = file;
+      localStorage.setItem('fulgor_theme', themeKey);
+      const sel = document.getElementById('themeSelect');
+      if (sel) sel.value = themeKey;
+    }
+
+    function initTheme() {
+      const saved = localStorage.getItem('fulgor_theme') || 'default';
+      changeTheme(saved);
+    }
+
+    initTheme();
 
     function openAboutModal() {
       const modal = document.getElementById('aboutModal');

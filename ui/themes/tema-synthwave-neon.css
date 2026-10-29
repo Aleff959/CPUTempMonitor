@@ -1,0 +1,1043 @@
+/**
+ * Fulgor PCista - Tema Synthwave Neon (Modelo C - Foco Único / Outfit)
+ * Folha de estilo modular gerada com suporte pleno a todos os componentes,
+ * cards de telemetria, painel de controles e submenus modais (Sobre / Atualizações / Guia).
+ */
+
+:root {
+/* Paleta Synthwave Neon & Deep Space */
+  --md-sys-color-primary: #FB7185;
+  --md-sys-color-on-primary: #4C0015;
+  --md-sys-color-primary-container: #3E1624;
+  --md-sys-color-on-primary-container: #FFD9E0;
+  --md-sys-color-surface: #0B1220;
+  --md-sys-color-surface-container: #111A2C;
+  --md-sys-color-surface-container-high: #1A253A;
+  --md-sys-color-on-surface: #E6EDF7;
+  --md-sys-color-on-surface-variant: #A8B5C9;
+  --md-sys-color-outline: #2D3B55;
+  --md-sys-color-secondary-container: #1F2D47;
+  --md-sys-color-on-secondary-container: #D1E1FF;
+  --md-sys-color-tertiary: #2DD4BF;
+  --md-sys-color-tertiary-container: #0E3E37;
+  --md-sys-color-error: #FF5470;
+  --font-family: 'Outfit', -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+}
+
+* {
+      box-sizing: border-box;
+      user-select: none;
+      margin: 0;
+      padding: 0;
+      -webkit-user-drag: none;
+    }
+
+    body {
+      background-color: var(--md-sys-color-surface);
+      color: var(--md-sys-color-on-surface);
+      font-family: var(--font-family);
+      width: 100vw;
+      height: 100vh;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* Header Bar */
+    .titlebar {
+      height: 48px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 8px 20px 0 20px;
+      background: transparent;
+    }
+
+    .app-branding {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .app-icon {
+      width: 28px;
+      height: 28px;
+      background: linear-gradient(135deg, #00b0ff, #0069c0);
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 15px;
+      font-weight: 800;
+      color: #ffffff;
+      box-shadow: 0 2px 8px rgba(0, 176, 255, 0.35);
+    }
+
+    .app-title {
+      font-size: 15px;
+      font-weight: 700;
+      letter-spacing: 0.3px;
+      color: var(--md-sys-color-on-surface);
+    }
+
+    .version-tag {
+      font-size: 11px;
+      color: var(--md-sys-color-outline);
+      background: rgba(255, 255, 255, 0.06);
+      padding: 3px 9px;
+      border-radius: 12px;
+      font-weight: 600;
+    }
+
+    .usb-badge {
+      font-size: 11px;
+      font-weight: 600;
+      padding: 4px 11px;
+      border-radius: 12px;
+      background: rgba(76, 175, 80, 0.15);
+      color: #81c784;
+      border: 1px solid rgba(129, 199, 132, 0.3);
+    }
+
+    /* Main Container */
+    .content {
+      flex: 1;
+      padding: 10px 20px 14px 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      overflow-y: auto;
+    }
+
+    /* Live Display Banner */
+    .display-status-banner {
+      background: var(--md-sys-color-surface-container);
+      border-radius: 16px;
+      padding: 12px 18px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .display-status-banner::before {
+      content: '';
+      position: absolute;
+      left: 0;
+      top: 0;
+      bottom: 0;
+      width: 5px;
+      background: var(--md-sys-color-primary);
+      transition: background 0.3s;
+    }
+
+    .banner-left {
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+    }
+
+    .banner-label {
+      font-size: 10px;
+      text-transform: uppercase;
+      letter-spacing: 0.9px;
+      color: var(--md-sys-color-outline);
+      font-weight: 700;
+    }
+
+    .banner-active-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 13.5px;
+      font-weight: 700;
+      color: var(--md-sys-color-primary);
+      white-space: nowrap;
+    }
+
+    .pulse-dot {
+      width: 9px;
+      height: 9px;
+      border-radius: 50%;
+      background: var(--md-sys-color-primary);
+      box-shadow: 0 0 10px var(--md-sys-color-primary);
+      animation: pulse 1.5s infinite;
+    }
+
+    @keyframes pulse {
+      0% { transform: scale(0.9); opacity: 0.8; }
+      50% { transform: scale(1.2); opacity: 1; }
+      100% { transform: scale(0.9); opacity: 0.8; }
+    }
+
+    .banner-unit-badge {
+      background: var(--md-sys-color-primary-container);
+      color: var(--md-sys-color-on-primary-container);
+      font-size: 11px;
+      padding: 4px 12px;
+      border-radius: 20px;
+      font-weight: 600;
+    }
+
+    /* Cards Grid */
+    .metrics-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+
+    .metric-card {
+      background: var(--md-sys-color-surface-container);
+      border-radius: 16px;
+      padding: 12px 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+      position: relative;
+      cursor: pointer;
+    }
+
+    .metric-card:hover {
+      background: var(--md-sys-color-surface-container-high);
+    }
+
+    .metric-card.active-target {
+      border: 1.5px solid var(--md-sys-color-primary);
+      background: var(--md-sys-color-surface-container-high);
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4), 0 0 16px rgba(128, 212, 255, 0.15);
+    }
+
+    .card-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .card-title {
+      font-size: 12.5px;
+      font-weight: 600;
+      color: var(--md-sys-color-on-surface-variant);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .live-chip {
+      font-size: 9px;
+      font-weight: 700;
+      padding: 2px 7px;
+      border-radius: 10px;
+      background: var(--md-sys-color-primary);
+      color: var(--md-sys-color-on-primary);
+      display: none;
+      letter-spacing: 0.3px;
+    }
+
+    .metric-card.active-target .live-chip {
+      display: inline-block;
+    }
+
+    .temp-large-display {
+      display: flex;
+      align-items: baseline;
+      gap: 4px;
+      margin: 1px 0;
+    }
+
+    .temp-val {
+      font-size: 34px;
+      font-weight: 800;
+      letter-spacing: -0.8px;
+      line-height: 1;
+      font-feature-settings: 'tnum';
+    }
+
+    .temp-deg {
+      font-size: 18px;
+      font-weight: 600;
+      color: var(--md-sys-color-outline);
+    }
+
+    .extra-stats {
+      display: flex;
+      gap: 12px;
+      padding-top: 6px;
+      border-top: 1px solid rgba(255, 255, 255, 0.06);
+    }
+
+    .stat-item {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+
+    .stat-lbl {
+      font-size: 10px;
+      color: var(--md-sys-color-outline);
+      text-transform: uppercase;
+      letter-spacing: 0.4px;
+    }
+
+    .stat-val {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--md-sys-color-on-surface);
+    }
+
+    /* Motherboard Dedicated Card (Sistema) */
+    .mb-card {
+      background: var(--md-sys-color-surface-container);
+      border-radius: 18px;
+      padding: 13px 18px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      transition: all 0.25s;
+    }
+
+    .mb-card:hover {
+      background: var(--md-sys-color-surface-container-high);
+    }
+
+    .mb-left {
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+    }
+
+    .mb-title-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .internal-badge {
+      font-size: 9px;
+      font-weight: 700;
+      padding: 2px 8px;
+      border-radius: 10px;
+      background: rgba(255, 255, 255, 0.08);
+      color: var(--md-sys-color-outline);
+      letter-spacing: 0.4px;
+    }
+
+    .mb-model {
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--md-sys-color-on-surface);
+    }
+
+    .mb-status-pill {
+      font-size: 11px;
+      color: #81c784;
+      font-weight: 600;
+    }
+
+    .mb-right {
+      display: flex;
+      align-items: baseline;
+      gap: 3px;
+    }
+
+    .mb-temp-val {
+      font-size: 34px;
+      font-weight: 800;
+      letter-spacing: -0.5px;
+      line-height: 1;
+      font-feature-settings: 'tnum';
+    }
+
+    .mb-temp-deg {
+      font-size: 18px;
+      font-weight: 600;
+      color: var(--md-sys-color-outline);
+    }
+
+    /* Controls Panel (Transmissão Térmica para o Visor) */
+    .controls-panel {
+      background: var(--md-sys-color-surface-container);
+      border-radius: 18px;
+      padding: 14px 18px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      border: 1px solid rgba(255, 255, 255, 0.05);
+    }
+
+    .control-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .control-label-group {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+
+    .control-title {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--md-sys-color-on-surface);
+    }
+
+    .control-subtitle {
+      font-size: 11px;
+      color: var(--md-sys-color-outline);
+    }
+
+    .segmented-button {
+      display: inline-flex;
+      background: var(--md-sys-color-surface);
+      border-radius: 24px;
+      padding: 3px;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      gap: 4px;
+    }
+
+    .seg-btn {
+      border: none;
+      background: transparent;
+      padding: 6px 14px;
+      border-radius: 18px;
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--md-sys-color-on-surface-variant);
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .seg-btn.active {
+      background: var(--md-sys-color-secondary-container);
+      color: var(--md-sys-color-on-secondary-container);
+    }
+
+    .auto-switch-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 8px 12px;
+      background: rgba(255, 255, 255, 0.03);
+      border-radius: 14px;
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      cursor: pointer;
+      user-select: none;
+      transition: background 0.2s;
+      margin: 4px 0 2px 0;
+    }
+
+    .auto-switch-row:hover {
+      background: rgba(255, 255, 255, 0.05);
+    }
+
+    .auto-switch-info {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+
+    .auto-switch-title {
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--md-sys-color-on-surface);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .auto-switch-sub {
+      font-size: 10px;
+      color: var(--md-sys-color-outline);
+    }
+
+    .md3-switch {
+      position: relative;
+      display: inline-block;
+      width: 40px;
+      height: 22px;
+      flex-shrink: 0;
+    }
+
+    .md3-switch input {
+      opacity: 0;
+      width: 0;
+      height: 0;
+    }
+
+    .md3-slider {
+      position: absolute;
+      cursor: pointer;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-color: #2b3036;
+      border: 2px solid rgba(255, 255, 255, 0.2);
+      transition: .25s;
+      border-radius: 22px;
+    }
+
+    .md3-slider:before {
+      position: absolute;
+      content: "";
+      height: 12px;
+      width: 12px;
+      left: 3px;
+      bottom: 3px;
+      background-color: var(--md-sys-color-outline);
+      transition: .25s cubic-bezier(0.4, 0, 0.2, 1);
+      border-radius: 50%;
+    }
+
+    input:checked + .md3-slider {
+      background-color: #00472e;
+      border-color: #69f0ae;
+    }
+
+    input:checked + .md3-slider:before {
+      transform: translateX(18px);
+      background-color: #69f0ae;
+    }
+
+    .control-note {
+      font-size: 10.5px;
+      color: var(--md-sys-color-on-surface-variant);
+      line-height: 1.45;
+      padding-top: 8px;
+      border-top: 1px solid rgba(255, 255, 255, 0.06);
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+    }
+
+    .control-note-title {
+      font-weight: 700;
+      color: var(--md-sys-color-primary);
+      font-size: 11px;
+    }
+
+    .control-note-list {
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+      padding-left: 2px;
+    }
+
+    .control-note-explanation {
+      font-size: 10px;
+      color: var(--md-sys-color-outline);
+      background: rgba(255, 255, 255, 0.03);
+      padding: 6px 8px;
+      border-radius: 8px;
+      border-left: 2px solid var(--md-sys-color-primary);
+      margin-top: 2px;
+      line-height: 1.4;
+    }
+
+    /* Footer Bar with "Sobre" Button */
+    .footer-bar {
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      padding: 2px 2px 0 2px;
+    }
+
+    .btn-about {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      color: var(--md-sys-color-outline);
+      padding: 5px 13px;
+      border-radius: 14px;
+      font-size: 11.5px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .btn-about:hover {
+      background: var(--md-sys-color-surface-container-high);
+      color: var(--md-sys-color-primary);
+      border-color: rgba(128, 212, 255, 0.3);
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+      transform: translateY(-1px);
+    }
+
+    .btn-about:active {
+      transform: translateY(0);
+    }
+
+    /* Modal Backdrop & Dialog */
+    .modal-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.75);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .modal-backdrop.open {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .modal-card {
+      background: #181c22;
+      border-radius: 22px;
+      width: 90%;
+      max-width: 480px;
+      max-height: 88vh;
+      overflow-y: auto;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      box-shadow: 0 24px 48px rgba(0, 0, 0, 0.8);
+      padding: 20px 22px;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      transform: scale(0.92);
+      transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .modal-backdrop.open .modal-card {
+      transform: scale(1);
+    }
+
+    .modal-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+      padding-bottom: 12px;
+    }
+
+    .modal-branding {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .modal-icon {
+      width: 36px;
+      height: 36px;
+      background: linear-gradient(135deg, #00b0ff, #0069c0);
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 18px;
+      font-weight: 800;
+      color: #fff;
+      box-shadow: 0 4px 12px rgba(0, 176, 255, 0.35);
+    }
+
+    .modal-title {
+      font-size: 16px;
+      font-weight: 700;
+      color: #fff;
+      letter-spacing: 0.3px;
+    }
+
+    .modal-subtitle {
+      font-size: 11.5px;
+      color: var(--md-sys-color-primary);
+      font-weight: 600;
+    }
+
+    .modal-close-btn {
+      background: rgba(255, 255, 255, 0.08);
+      border: none;
+      color: var(--md-sys-color-outline);
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      font-size: 13px;
+      transition: all 0.2s;
+    }
+
+    .modal-close-btn:hover {
+      background: rgba(255, 255, 255, 0.16);
+      color: #fff;
+    }
+
+    .modal-body {
+      display: flex;
+      flex-direction: column;
+      gap: 13px;
+    }
+
+    .about-sec {
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+    }
+
+    .about-sec-lbl {
+      font-size: 10px;
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+      color: var(--md-sys-color-outline);
+      font-weight: 700;
+    }
+
+    .device-card {
+      background: var(--md-sys-color-surface);
+      border-radius: 14px;
+      padding: 11px 14px;
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+    }
+
+    .device-name {
+      font-size: 13.5px;
+      font-weight: 700;
+      color: var(--md-sys-color-primary);
+    }
+
+    .device-meta {
+      font-size: 11px;
+      color: var(--md-sys-color-outline);
+      line-height: 1.4;
+    }
+
+    .links-grid {
+      display: flex;
+      flex-direction: column;
+      gap: 7px;
+    }
+
+    .ext-link-card {
+      background: var(--md-sys-color-surface);
+      border-radius: 12px;
+      padding: 10px 14px;
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .ext-link-card:hover {
+      background: rgba(128, 212, 255, 0.08);
+      border-color: rgba(128, 212, 255, 0.3);
+      transform: translateX(2px);
+    }
+
+    .link-title {
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--md-sys-color-on-surface);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .link-arrow {
+      font-size: 11.5px;
+      color: var(--md-sys-color-primary);
+      font-weight: 700;
+    }
+
+    .about-text-p {
+      font-size: 11.5px;
+      line-height: 1.5;
+      color: var(--md-sys-color-on-surface-variant);
+      background: var(--md-sys-color-surface);
+      padding: 10px 12px;
+      border-radius: 12px;
+      border: 1px solid rgba(255, 255, 255, 0.05);
+    }
+
+    .tech-tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+    }
+
+    .tech-tag {
+      font-size: 10px;
+      font-weight: 600;
+      background: rgba(255, 255, 255, 0.05);
+      padding: 3px 9px;
+      border-radius: 8px;
+      color: var(--md-sys-color-outline);
+      border: 1px solid rgba(255, 255, 255, 0.05);
+    }
+
+    /* Telemetry Convention Card & Info Tooltip */
+    .telemetry-convention-card {
+      background: var(--md-sys-color-surface);
+      border-radius: 14px;
+      padding: 12px 14px;
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .convention-item {
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+      padding-bottom: 6px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+    }
+
+    .convention-item:last-of-type {
+      border-bottom: none;
+      padding-bottom: 0;
+    }
+
+    .convention-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+    }
+
+    .convention-badge {
+      font-size: 10px;
+      font-weight: 700;
+      padding: 2px 7px;
+      border-radius: 6px;
+      text-transform: uppercase;
+      letter-spacing: 0.4px;
+    }
+
+    .convention-badge.mode-cpu {
+      background: rgba(128, 212, 255, 0.15);
+      color: #80d4ff;
+    }
+
+    .convention-badge.mode-gpu {
+      background: rgba(255, 183, 124, 0.15);
+      color: #ffb77c;
+    }
+
+    .convention-badge.mode-fps {
+      background: rgba(105, 240, 174, 0.15);
+      color: #69f0ae;
+    }
+
+    .convention-glyphs {
+      font-size: 10.5px;
+      color: var(--md-sys-color-outline);
+    }
+
+    .convention-details {
+      font-size: 11px;
+      color: var(--md-sys-color-on-surface-variant);
+      line-height: 1.4;
+      padding-left: 2px;
+    }
+
+    .convention-rationale {
+      font-size: 10.5px;
+      color: var(--md-sys-color-outline);
+      background: rgba(255, 255, 255, 0.02);
+      padding: 8px 10px;
+      border-radius: 10px;
+      line-height: 1.45;
+      border-left: 2px solid #ffb77c;
+      margin-top: 4px;
+    }
+
+    .info-badge {
+      font-size: 11.5px;
+      cursor: help;
+      opacity: 0.75;
+      margin-left: 6px;
+      display: inline-flex;
+      align-items: center;
+      transition: opacity 0.2s;
+    }
+
+    .info-badge:hover {
+      opacity: 1;
+    }
+
+    .modal-footer-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding-top: 10px;
+      border-top: 1px solid rgba(255, 255, 255, 0.08);
+    }
+
+    .footer-author {
+      font-size: 10.5px;
+      color: var(--md-sys-color-outline);
+    }
+
+    .btn-modal-close-action {
+      background: var(--md-sys-color-primary);
+      color: var(--md-sys-color-on-primary);
+      border: none;
+      padding: 6px 16px;
+      border-radius: 14px;
+      font-size: 11.5px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .btn-modal-close-action:hover {
+      box-shadow: 0 2px 10px rgba(0, 176, 255, 0.4);
+    }
+
+    /* Central de Atualizações OTA */
+    .updater-card {
+      background: var(--md-sys-color-surface);
+      border-radius: 12px;
+      padding: 10px 12px;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .updater-status-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+    }
+
+    .updater-info {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+
+    .updater-version-label {
+      font-size: 11.5px;
+      font-weight: 700;
+      color: var(--md-sys-color-on-surface);
+    }
+
+    .updater-status-sub {
+      font-size: 10.5px;
+      color: var(--md-sys-color-outline);
+    }
+
+    .btn-check-update {
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      color: var(--md-sys-color-on-surface);
+      padding: 6px 12px;
+      border-radius: 14px;
+      font-size: 11px;
+      font-weight: 600;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      transition: all 0.2s;
+    }
+
+    .btn-check-update:hover {
+      background: rgba(255, 255, 255, 0.1);
+      border-color: var(--md-sys-color-primary);
+    }
+
+    .update-available-banner {
+      background: rgba(105, 240, 174, 0.08);
+      border: 1px solid rgba(105, 240, 174, 0.2);
+      border-radius: 10px;
+      padding: 10px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .btn-apply-update {
+      background: #00e676;
+      color: #002714;
+      border: none;
+      padding: 7px 14px;
+      border-radius: 12px;
+      font-size: 11.5px;
+      font-weight: 800;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      transition: all 0.2s;
+    }
+
+    .btn-apply-update:hover {
+      box-shadow: 0 2px 10px rgba(0, 230, 118, 0.4);
+    }
+
+    .update-badge-dot {
+      display: inline-block;
+      width: 7px;
+      height: 7px;
+      background: #69f0ae;
+      border-radius: 50%;
+      margin-left: 4px;
+      box-shadow: 0 0 6px #69f0ae;
+    }
+
+/* Customizações de Destaque - Synthwave Neon */
+.app-icon, .modal-icon {
+  background: linear-gradient(135deg, #FB7185, #9F1239) !important;
+  color: #FFFFFF !important;
+  box-shadow: 0 0 14px rgba(251, 113, 133, 0.4) !important;
+}
+
+.usb-badge {
+  background: rgba(45, 212, 191, 0.12) !important;
+  color: #2DD4BF !important;
+  border-color: rgba(45, 212, 191, 0.3) !important;
+}
+
+.display-status-banner, .metric-card, .controls-panel, .device-card, .updater-card, .ext-link-card, .telemetry-convention-card, .about-text-p {
+  border: 1px solid rgba(255, 255, 255, 0.08) !important;
+}
+
+.btn-modal-close-action {
+  background: #FB7185 !important;
+  color: #4C0015 !important;
+  font-weight: 700 !important;
+}
+
+.btn-modal-close-action:hover {
+  box-shadow: 0 0 15px rgba(251, 113, 133, 0.5) !important;
+}
+
+.ext-link-card:hover {
+  background: rgba(251, 113, 133, 0.08) !important;
+  border-color: rgba(251, 113, 133, 0.35) !important;
+}
+
+input:checked + .md3-slider {
+  background-color: #3E1624 !important;
+  border-color: #FB7185 !important;
+}
+
+input:checked + .md3-slider:before {
+  background-color: #FB7185 !important;
+}
