@@ -3,9 +3,9 @@ from PyInstaller.utils.hooks import collect_all
 
 datas_pn, binaries_pn, hiddenimports_pn = collect_all('pythonnet')
 
-datas = [('ui', 'ui'), ('app.ico', '.'), ('OpenHardwareMonitorServer.exe', '.'), ('OpenHardwareMonitorServer.exe.config', '.'), ('LibreHardwareMonitorLib.dll', '.')] + datas_pn
+datas = [('ui', 'ui'), ('app.ico', '.'), ('configurar_autostart.ps1', '.'), ('OpenHardwareMonitorServer.exe', '.'), ('OpenHardwareMonitorServer.exe.config', '.'), ('LibreHardwareMonitorLib.dll', '.')] + datas_pn
 binaries = binaries_pn
-hiddenimports = hiddenimports_pn + ['clr']
+hiddenimports = hiddenimports_pn + ['clr', 'service_bridge']
 
 a = Analysis(
     ['main.py'],

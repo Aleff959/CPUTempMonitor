@@ -23,6 +23,7 @@ ALLOWED_HOSTS = {
     "objects.githubusercontent.com",
     "raw.githubusercontent.com",
     "codeload.github.com",
+    "release-assets.githubusercontent.com",
 }
 
 
@@ -175,7 +176,7 @@ def _cleanup_dir(directory: str) -> None:
 
 
 class AppUpdater:
-    def __init__(self, current_version="1.5.0", current_comp=22):
+    def __init__(self, current_version="1.8.0", current_comp=27):
         self.current_version = current_version
         self.current_comp = current_comp
         self.update_info = None

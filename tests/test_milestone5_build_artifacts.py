@@ -12,26 +12,28 @@ EXE_PATH = os.path.join(DIST_DIR, "FulgorPCista.exe")
 SHA256_FILE = os.path.join(DIST_DIR, "FulgorPCista.exe.sha256")
 SHA256SUMS_FILE = os.path.join(DIST_DIR, "SHA256SUMS")
 BUILDS_DIR = r"C:\Users\Alpha\Documents\builds"
-PREV_BACKUP_ZIP = os.path.join(BUILDS_DIR, "FulgorPCista_1.4.0_Comp21.zip")
+PREV_BACKUP_ZIP = os.path.join(BUILDS_DIR, "FulgorPCista_1.7.0_Comp26.zip")
 
 
 class TestMilestone5BuildArtifacts(unittest.TestCase):
     """E2E Verification of Milestone 5 build artifacts, checksums, and backup compliance."""
 
     def test_versioning_and_compilation_numbers(self):
-        """Rule 1 & 2: Verify APP_VERSION is 1.5.0 and APP_COMP is 22 across main, updater, and UI."""
-        self.assertEqual(main.APP_VERSION, "1.5.0")
-        self.assertEqual(main.APP_COMP, 22)
-        self.assertIn("1.5.0 | Comp. 22", main.WINDOW_TITLE)
+        """Rule 1 & 2: Verify APP_VERSION is 1.8.0, APP_COMP is 26, and APP_CODENAME is Ay across main, updater, and UI."""
+        self.assertEqual(main.APP_VERSION, "1.8.0")
+        self.assertEqual(main.APP_COMP, 27)
+        self.assertEqual(main.APP_CODENAME, "Ay")
+        self.assertIn("1.8.0 | Comp. 27 - Ay", main.WINDOW_TITLE)
 
         updater_default = AppUpdater()
-        self.assertEqual(updater_default.current_version, "1.5.0")
-        self.assertEqual(updater_default.current_comp, 22)
+        self.assertEqual(updater_default.current_version, "1.8.0")
+        self.assertEqual(updater_default.current_comp, 27)
 
         index_path = os.path.join(REPO_ROOT, "ui", "index.html")
         with open(index_path, "r", encoding="utf-8") as f:
             html = f.read()
-        self.assertIn("v1.5.0 | Comp. 22", html)
+        self.assertIn("v1.8.0 | Comp. 27", html)
+        self.assertIn("v1.8.0 (Ay) • Comp. 27", html)
 
     def test_build_backups_in_documents_builds(self):
         """Rule 3: Ensure backups are compressed inside C:\\Users\\Alpha\\Documents\\builds."""
@@ -44,7 +46,7 @@ class TestMilestone5BuildArtifacts(unittest.TestCase):
             info = zf.getinfo("FulgorPCista.exe")
             self.assertGreater(info.file_size, 10_000_000, "Zipped previous executable must be valid size")
 
-        curr_backup_zip = os.path.join(BUILDS_DIR, "FulgorPCista_1.5.0_Comp22.zip")
+        curr_backup_zip = os.path.join(BUILDS_DIR, "FulgorPCista_1.8.0_Comp27.zip")
         self.assertTrue(os.path.isfile(curr_backup_zip), f"Current backup {curr_backup_zip} must exist")
         with zipfile.ZipFile(curr_backup_zip, "r") as zf:
             self.assertIn("FulgorPCista.exe", zf.namelist(), "Current backup zip must contain FulgorPCista.exe")
@@ -84,6 +86,60 @@ class TestMilestone5BuildArtifacts(unittest.TestCase):
         parsed_from_sums = parse_hash_from_checksum_file(sums_content, "FulgorPCista.exe")
         self.assertEqual(parsed_from_sums, actual_hash)
 
+    def test_prelogon_service_bridge_ipc(self):
+        """Verify TelemetryIPCServer and TelemetryIPCClient roundtrip communication."""
+        from service_bridge import TelemetryIPCServer, TelemetryIPCClient
+
+        class DummyCore:
+            def __init__(self):
+                self.mode = "CPU"
+                self.auto_sw = 1
+                self.ext_fps = 0.0
+                self.ext_game = False
+
+            def get_data(self):
+                return {"cpu_temp": 45.0, "active_device": self.mode, "auto_switch_fps": self.auto_sw, "fps": int(self.ext_fps), "in_game": self.ext_game}
+
+            def set_mode(self, mode, interval=5.0):
+                self.mode = mode
+                return True
+
+            def set_auto_switch(self, enabled):
+                self.auto_sw = 1 if enabled else 0
+                return True
+
+            def set_led(self, state):
+                return True
+
+            def update_external_session_metrics(self, fps, in_game):
+                self.ext_fps = fps
+                self.ext_game = in_game
+                return True
+
+            def close(self):
+                pass
+
+        dummy = DummyCore()
+        test_port = 49842
+        srv = TelemetryIPCServer(dummy, port=test_port)
+        try:
+            client = TelemetryIPCClient(timeout=1.0, port=test_port)
+            self.assertTrue(client.is_alive())
+            data = client.get_data()
+            self.assertIsNotNone(data)
+            self.assertEqual(data["cpu_temp"], 45.0)
+            self.assertTrue(data["service_active"])
+
+            self.assertTrue(client.set_mode("GPU"))
+            self.assertEqual(dummy.mode, "GPU")
+
+            self.assertTrue(client.send_session_metrics(144.0, True))
+            self.assertEqual(dummy.ext_fps, 144.0)
+            self.assertTrue(dummy.ext_game)
+        finally:
+            srv.stop()
+
 
 if __name__ == "__main__":
     unittest.main()
+
