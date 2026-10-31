@@ -1,0 +1,44 @@
+/* Fulgor PCista - Tema Terminal Matrix */
+@font-face {
+  font-family: 'JetBrains Mono';
+  font-style: normal;
+  font-weight: 100 800;
+  font-display: swap;
+  src: url('../fonts/jetbrains-mono.woff2') format('woff2');
+}
+
+:root {
+  --md-sys-color-primary: #7CFF9B;
+  --md-sys-color-on-primary: #003B14;
+  --md-sys-color-primary-container: #00531F;
+  --md-sys-color-on-primary-container: #9BFFB4;
+  --md-sys-color-surface: #050B07;
+  --md-sys-color-surface-container: #0A140D;
+  --md-sys-color-surface-container-high: #101F15;
+  --md-sys-color-on-surface: #D8F8DE;
+  --md-sys-color-on-surface-variant: #8FA895;
+  --md-sys-color-outline: #47614E;
+  --md-sys-color-secondary-container: #0E2B16;
+  --md-sys-color-on-secondary-container: #9CF3AF;
+  --md-sys-color-tertiary: #4ECCA3;
+  --md-sys-color-tertiary-container: #1B4D3E;
+  --md-sys-color-error: #FF6E6E;
+  --font-family: 'JetBrains Mono', Consolas, ui-monospace, monospace;
+  --font-mono: 'JetBrains Mono', Consolas, ui-monospace, monospace;
+
+  --theme-icon-gradient: linear-gradient(135deg, #7CFF9B, #2A9144);
+  --theme-icon-color: #003B14;
+  --theme-icon-shadow: 0 0 12px rgba(124, 255, 155, 0.3);
+  --theme-usb-badge-bg: rgba(124, 255, 155, 0.12);
+  --theme-usb-badge-color: #7CFF9B;
+  --theme-usb-badge-border: rgba(124, 255, 155, 0.3);
+  --theme-card-border: #24352B;
+  --theme-btn-action-bg: #7CFF9B;
+  --theme-btn-action-color: #003B14;
+  --theme-btn-action-hover-shadow: 0 0 14px rgba(124, 255, 155, 0.45);
+  --theme-ext-link-hover-bg: rgba(124, 255, 155, 0.08);
+  --theme-ext-link-hover-border: rgba(124, 255, 155, 0.35);
+  --theme-slider-checked-bg: #12301C;
+  --theme-slider-checked-border: #7CFF9B;
+  --theme-slider-checked-thumb: #7CFF9B;
+}

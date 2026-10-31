@@ -1,0 +1,43 @@
+/* Fulgor PCista - Tema Synthwave Neon */
+@font-face {
+  font-family: 'Outfit';
+  font-style: normal;
+  font-weight: 100 900;
+  font-display: swap;
+  src: url('../fonts/outfit.woff2') format('woff2');
+}
+
+:root {
+  --md-sys-color-primary: #FB7185;
+  --md-sys-color-on-primary: #4C0015;
+  --md-sys-color-primary-container: #700023;
+  --md-sys-color-on-primary-container: #FFD9DF;
+  --md-sys-color-surface: #090814;
+  --md-sys-color-surface-container: #121024;
+  --md-sys-color-surface-container-high: #1D1A38;
+  --md-sys-color-on-surface: #F5E8FF;
+  --md-sys-color-on-surface-variant: #CBB9D8;
+  --md-sys-color-outline: #857094;
+  --md-sys-color-secondary-container: #2A173B;
+  --md-sys-color-on-secondary-container: #F3CAFF;
+  --md-sys-color-tertiary: #38BDF8;
+  --md-sys-color-tertiary-container: #004E72;
+  --md-sys-color-error: #FF5449;
+  --font-family: 'Outfit', -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+
+  --theme-icon-gradient: linear-gradient(135deg, #FB7185, #9F1239);
+  --theme-icon-color: #FFFFFF;
+  --theme-icon-shadow: 0 0 14px rgba(251, 113, 133, 0.4);
+  --theme-usb-badge-bg: rgba(45, 212, 191, 0.12);
+  --theme-usb-badge-color: #2DD4BF;
+  --theme-usb-badge-border: rgba(45, 212, 191, 0.3);
+  --theme-card-border: rgba(255, 255, 255, 0.08);
+  --theme-btn-action-bg: #FB7185;
+  --theme-btn-action-color: #4C0015;
+  --theme-btn-action-hover-shadow: 0 0 15px rgba(251, 113, 133, 0.5);
+  --theme-ext-link-hover-bg: rgba(251, 113, 133, 0.08);
+  --theme-ext-link-hover-border: rgba(251, 113, 133, 0.35);
+  --theme-slider-checked-bg: #3E1624;
+  --theme-slider-checked-border: #FB7185;
+  --theme-slider-checked-thumb: #FB7185;
+}

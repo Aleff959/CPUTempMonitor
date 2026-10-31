@@ -1,0 +1,57 @@
+/* Fulgor PCista - Tema Âmbar Industrial */
+@font-face {
+  font-family: 'IBM Plex Sans';
+  font-style: normal;
+  font-weight: 400 700;
+  font-display: swap;
+  src: url('../fonts/ibm-plex-sans.woff2') format('woff2');
+}
+
+@font-face {
+  font-family: 'IBM Plex Mono';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url('../fonts/ibm-plex-mono-400.woff2') format('woff2');
+}
+
+@font-face {
+  font-family: 'IBM Plex Mono';
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+  src: url('../fonts/ibm-plex-mono-600.woff2') format('woff2');
+}
+
+:root {
+  --md-sys-color-primary: #FFB224;
+  --md-sys-color-on-primary: #1F1400;
+  --md-sys-color-primary-container: #3D2800;
+  --md-sys-color-on-primary-container: #FFE5A3;
+  --md-sys-color-surface: #0D0E10;
+  --md-sys-color-surface-container: #141619;
+  --md-sys-color-surface-container-high: #1E2126;
+  --md-sys-color-on-surface: #E8E9EB;
+  --md-sys-color-on-surface-variant: #A3A8AD;
+  --md-sys-color-outline: #5A6066;
+  --md-sys-color-secondary-container: #26200A;
+  --md-sys-color-on-secondary-container: #FFD27A;
+  --md-sys-color-tertiary: #FFD27A;
+  --md-sys-color-tertiary-container: #382C10;
+  --md-sys-color-error: #FF6B6B;
+  --font-family: 'IBM Plex Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+  --font-mono: 'IBM Plex Mono', ui-monospace, Consolas, monospace;
+
+  --theme-icon-gradient: linear-gradient(135deg, #FFB224, #B27500);
+  --theme-icon-color: #1F1400;
+  --theme-icon-shadow: 0 2px 10px rgba(255, 178, 36, 0.35);
+  --theme-usb-badge-bg: rgba(74, 222, 128, 0.12);
+  --theme-usb-badge-color: #4ADE80;
+  --theme-usb-badge-border: rgba(74, 222, 128, 0.25);
+  --theme-card-border: rgba(255, 178, 36, 0.15);
+  --theme-btn-action-bg: #FFB224;
+  --theme-btn-action-color: #1F1400;
+  --theme-btn-action-hover-shadow: 0 2px 12px rgba(255, 178, 36, 0.4);
+  --theme-ext-link-hover-bg: rgba(255, 178, 36, 0.08);
+  --theme-ext-link-hover-border: rgba(255, 178, 36, 0.3);
+}

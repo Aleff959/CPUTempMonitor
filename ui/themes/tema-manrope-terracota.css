@@ -1,0 +1,66 @@
+/* Fulgor PCista - Tema Terracota & Warm Sand */
+@font-face {
+  font-family: 'Manrope';
+  font-style: normal;
+  font-weight: 200 800;
+  font-display: swap;
+  src: url('../fonts/manrope.woff2') format('woff2');
+}
+
+:root {
+  --theme-color-scheme: light;
+  --md-sys-color-primary: #D4502A;
+  --md-sys-color-on-primary: #FFFFFF;
+  --md-sys-color-primary-container: #FFDBCF;
+  --md-sys-color-on-primary-container: #380C02;
+  --md-sys-color-surface: #F3EFE6;
+  --md-sys-color-surface-container: #FBF9F4;
+  --md-sys-color-surface-container-high: #EAE4D5;
+  --md-sys-color-on-surface: #1B1B18;
+  --md-sys-color-on-surface-variant: #5E5B52;
+  --md-sys-color-outline: #C8C1B0;
+  --md-sys-color-secondary-container: #E8D8CB;
+  --md-sys-color-on-secondary-container: #2D1608;
+  --md-sys-color-tertiary: #B8401F;
+  --md-sys-color-tertiary-container: #FFE5DC;
+  --md-sys-color-error: #BA1A1A;
+  --font-family: 'Manrope', -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+
+  --theme-icon-gradient: linear-gradient(135deg, #FF7A4D, #D4502A);
+  --theme-icon-color: #FFFFFF;
+  --theme-icon-shadow: 0 2px 10px rgba(212, 80, 42, 0.3);
+  --theme-usb-badge-bg: rgba(46, 125, 50, 0.12);
+  --theme-usb-badge-color: #2E7D32;
+  --theme-usb-badge-border: rgba(46, 125, 50, 0.25);
+  --theme-version-tag-bg: rgba(0, 0, 0, 0.06);
+  --theme-version-tag-color: #5E5B52;
+  --theme-card-border: #D9D3C4;
+  --theme-card-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+  --theme-modal-backdrop: rgba(27, 27, 24, 0.5);
+  --theme-modal-card-bg: #FBF9F4;
+  --theme-modal-card-border: #D9D3C4;
+  --theme-modal-title-color: #1B1B18;
+  --theme-modal-close-btn-bg: rgba(0, 0, 0, 0.06);
+  --theme-modal-close-btn-color: #5E5B52;
+  --theme-modal-close-btn-hover-bg: rgba(0, 0, 0, 0.12);
+  --theme-modal-close-btn-hover-color: #1B1B18;
+  --theme-btn-action-bg: #D4502A;
+  --theme-btn-action-color: #FFFFFF;
+  --theme-btn-action-hover-shadow: 0 2px 12px rgba(212, 80, 42, 0.35);
+  --theme-ext-link-hover-bg: rgba(212, 80, 42, 0.08);
+  --theme-ext-link-hover-border: rgba(212, 80, 42, 0.3);
+  --theme-segmented-bg: #EAE4D5;
+  --theme-segmented-border: #D9D3C4;
+  --theme-seg-btn-active-bg: #1B1B18;
+  --theme-seg-btn-active-color: #F3EFE6;
+  --theme-slider-bg: #D9D3C4;
+  --theme-slider-border: #B5AEA0;
+  --theme-slider-thumb: #FFFFFF;
+  --theme-slider-checked-bg: #D4502A;
+  --theme-slider-checked-border: #D4502A;
+  --theme-slider-checked-thumb: #FFFFFF;
+}
+
+body {
+  color-scheme: light;
+}
