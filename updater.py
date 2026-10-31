@@ -176,7 +176,7 @@ def _cleanup_dir(directory: str) -> None:
 
 
 class AppUpdater:
-    def __init__(self, current_version="1.8.0", current_comp=27):
+    def __init__(self, current_version="1.9.0", current_comp=28):
         self.current_version = current_version
         self.current_comp = current_comp
         self.update_info = None

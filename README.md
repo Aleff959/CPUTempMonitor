@@ -1,6 +1,6 @@
-# ⚡ Fulgor PCista (v1.8.0 - Ay)
+# ⚡ Fulgor PCista (v1.9.0 | Comp. 28 - Black Lightning)
 
-[![Versão](https://img.shields.io/badge/vers%C3%A3o-1.8.0--Ay-00b0ff.svg)](https://github.com/Aleff959/CPUTempMonitor/releases)
+[![Versão](https://img.shields.io/badge/vers%C3%A3o-1.9.0--Black%20Lightning--Comp.28-00b0ff.svg)](https://github.com/Aleff959/CPUTempMonitor/releases)
 [![Plataforma](https://img.shields.io/badge/plataforma-Windows%2011%20%7C%2010-0078D6.svg)](https://github.com/Aleff959/CPUTempMonitor)
 [![Licença](https://img.shields.io/badge/licen%C3%A7a-MIT-green.svg)](LICENSE)
 [![Design](https://img.shields.io/badge/estilo-Material%20You%20Dark-111418.svg)](https://github.com/Aleff959/CPUTempMonitor)
@@ -29,6 +29,45 @@ Substitui totalmente os utilitários proprietários pesados e instáveis (`Devic
   * Automação sem alertas repetitivos de UAC via Agendador de Tarefas do Windows.
 * **🚀 Executável Único & Central de Atualizações OTA:** Distribuído em executável único portátil (.exe OneFile) com sistema de atualização integrado ao GitHub Releases. Notifica sobre novas versões, permite verificar novidades e aplica atualizações automaticamente com reinício transparente.
 * **ℹ️ Painel Informativo "Sobre":** Seção integrada com dados do hardware testado, referências da fabricante, créditos de engenharia reversa e tecnologias empregadas.
+
+---
+
+## 🎨 Arquitetura de Temas e Tipografia Offline (100% Local)
+
+O **Fulgor PCista** oferece 5 temas integrados de alta fidelidade:
+1. **Material You Clássico (Padrão):** Tons escuros refinados e acentos ciano/azul Material 3.
+2. **Âmbar Industrial:** Inspirado em instrumentação analógica clássica e monitores industriais monocromáticos âmbar.
+3. **Terracota & Areia:** Paleta orgânica e elegante com tons terrosos, tipografia Manrope e alto conforto visual.
+4. **Terminal Matrix:** Estilo hacker clássico com fontes monoespaçadas verdes e estética de console Unix.
+5. **Synthwave Neon:** Visual retrofuturista anos 80 com magenta elétrico, tons violeta e alto contraste.
+
+> **⚠️ Esclarecimento Arquitetural Essencial:**  
+> Todos os 5 temas (Âmbar Industrial, Terracota & Areia, Terminal Matrix, Synthwave Neon e Material You Clássico) são **variações puramente visuais e tipográficas** (paletas de cores `:root`, acentos luminosos, contrastes e fontes) aplicadas sobre o **mesmo grid de telemetria de 3 colunas**. Eles **não constituem leiautes estruturais diferentes**.
+
+### Características da Camada de Apresentação:
+* **Operação 100% Offline (Zero Requisições Externas & Zero Telemetria):** Todas as fontes tipográficas (IBM Plex Sans, IBM Plex Mono, Manrope, Outfit, JetBrains Mono) estão embutidas localmente em formato `.woff2` dentro do diretório `ui/fonts/`. Não há diretivas `@import` para CDNs ou fontes remotas, operando com zero requisições HTTP externas e zero telemetria.
+* **Persistência em Dupla Camada (Dual-Layer Persistence):** A escolha do tema é preservada simultaneamente no Registro do Windows (`HKCU\Software\Fulgor PCista\selected_theme`) e no armazenamento persistente do WebView2 (`%APPDATA%\FulgorPCista\webview_data` via `localStorage.getItem('fulgor_theme')` com `private_mode=False`), garantindo que a preferência do usuário permaneça ativa entre reinicializações do sistema ou encerramentos via bandeja.
+* **Eliminação do Flash Visual (Anti-Flash no `<head>`):** Um script síncrono ultra-rápido no `<head>` de `ui/index.html` aplica as variáveis CSS do tema persistido antes do primeiro desenho da interface (`DOM paint`), eliminando completamente piscadas ou transições indesejadas de estilo.
+
+---
+
+## 🛡️ Arquitetura de Segurança, Serviço e IPC
+
+A comunicação entre a interface gráfica (`main.py` / WebView2) e o motor de telemetria de baixo nível (`service_bridge.py`) segue rigorosos padrões de proteção contra exploração local e elevação de privilégios (LPE):
+
+* **Migração do Serviço e Tarefas para Diretório Protegido (`C:\Program Files\FulgorPCista`):**
+  * O serviço executado sob a conta privilegiada `NT AUTHORITY\SYSTEM` (tarefa agendada `FulgorPCista_BootService` via `BootTrigger`) e o script `configurar_autostart.ps1` executam estritamente a partir de `C:\Program Files\FulgorPCista\FulgorPCista.exe`.
+  * Essa arquitetura elimina completamente vulnerabilidades de Local Privilege Escalation (CWE-732), impedindo que executáveis localizados em diretórios graváveis por usuários comuns (como `%LOCALAPPDATA%` ou `%USERPROFILE%`) sejam executados com privilégios de sistema.
+* **Prevenção de Sequestro de Porta via `SO_EXCLUSIVEADDRUSE`:**
+  * O servidor IPC local (`127.0.0.1:49841`) configura o socket com `SO_EXCLUSIVEADDRUSE` no Windows.
+  * Isso impede ataques de sequestro de porta (*port hijacking* ou *socket squatting*) por outros processos locais sem privilégios que tentem vincular a mesma porta utilizando `SO_REUSEADDR`.
+* **Autenticação Criptográfica por Token de 256 bits (`secrets.token_hex(32)`):**
+  * Toda comunicação IPC requer autenticação obrigatória via token de 256 bits gerado com `secrets.token_hex(32)`.
+  * O arquivo de token (`C:\ProgramData\FulgorPCista\ipc.token`) é protegido por listas de controle de acesso (ACLs) do Windows: Controle Total para `NT AUTHORITY\SYSTEM` (`*S-1-5-18:(F)`) e Administradores (`*S-1-5-32-544:(F)`), e permissão estrita somente de leitura para o usuário interativo.
+* **Rejeição Estrita de Comandos Não Autenticados (Shutdown & Telemetria):**
+  * Requisições sem token válido ou não autorizadas são sumariamente rejeitadas com erro HTTP 401 (`Unauthorized`), impedindo que processos terceiros ou maliciosos terminem o serviço (`shutdown`) ou alterem a telemetria do sistema.
+* **Higienização de Processos com Validação de Caminho Canônico (`ExecutablePath`):**
+  * A função de encerramento de processos obsoletos (`_cleanup_legacy_and_stale_processes`) valida o caminho canônico do executável (`ExecutablePath`) em disco antes de finalizar qualquer processo, garantindo que executáveis homônimos fora da pasta autorizada nunca sejam encerrados.
 
 ---
 
@@ -117,6 +156,12 @@ python main.py
 ### Iniciar silenciosamente na bandeja:
 ```bash
 python main.py -hide
+```
+
+### Configuração de Inicialização Automática e Serviço (Autostart)
+Para registrar as tarefas agendadas e instalar o serviço no diretório protegido `C:\Program Files\FulgorPCista` (serviço pré-logon executado sob `NT AUTHORITY\SYSTEM` e inicialização na bandeja ao fazer login):
+```powershell
+powershell -ExecutionPolicy Bypass -File .\configurar_autostart.ps1
 ```
 
 ---

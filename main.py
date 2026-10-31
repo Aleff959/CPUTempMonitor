@@ -22,9 +22,9 @@ def _sys_ex(tp, val, tb):
 sys.excepthook = _sys_ex
 
 APP_NAME = "Fulgor PCista"
-APP_VERSION = "1.8.0"
-APP_COMP = 27
-APP_CODENAME = "Ay"
+APP_VERSION = "1.9.0"
+APP_COMP = 28
+APP_CODENAME = "Black Lightning"
 WINDOW_TITLE = f"{APP_NAME} ({APP_VERSION} | Comp. {APP_COMP} - {APP_CODENAME})"
 
 
@@ -63,6 +63,35 @@ class Api:
             return True
         except Exception as e:
             logging.error(f"Failed to open url {url}: {e}")
+            return False
+
+    def get_theme(self):
+        try:
+            import winreg
+            for sub in [r"Software\Fulgor PCista", r"Software\CPU TEMP Monitor"]:
+                try:
+                    with winreg.OpenKey(winreg.HKEY_CURRENT_USER, sub) as key:
+                        val, _ = winreg.QueryValueEx(key, "selected_theme")
+                        if val:
+                            return str(val)
+                except OSError:
+                    continue
+        except Exception as e:
+            logging.error(f"get_theme error: {e}")
+        return "ambar"
+
+    def set_theme(self, theme_name):
+        try:
+            import winreg
+            for sub in [r"Software\Fulgor PCista", r"Software\CPU TEMP Monitor"]:
+                try:
+                    with winreg.CreateKey(winreg.HKEY_CURRENT_USER, sub) as key:
+                        winreg.SetValueEx(key, "selected_theme", 0, winreg.REG_SZ, str(theme_name))
+                except OSError:
+                    continue
+            return True
+        except Exception as e:
+            logging.error(f"set_theme error: {e}")
             return False
 
     def check_updates(self):
@@ -312,36 +341,80 @@ _single_instance_mutex = None
 
 
 def _cleanup_legacy_and_stale_processes():
-    """Terminate any legacy/stale UI instances (e.g. from older compilations without single-instance mutex) and purge .old files."""
+    """
+    Termina instâncias legadas da interface gráfica validando o caminho completo do executável
+    (ExecutablePath) contra o diretório legítimo em Program Files ou binário ativo.
+    Protege processos com nomes coincidentes e preserva instâncias de serviço/daemon.
+    """
     try:
         import psutil
         my_pid = os.getpid()
         parent_pid = os.getppid()
-        for p in psutil.process_iter(["pid", "name", "cmdline"]):
+
+        # Conjunto de caminhos canônicos autorizados
+        legit_exes = set()
+        prog_files = os.environ.get("ProgramFiles", r"C:\Program Files")
+        canonical_exe = os.path.join(prog_files, "FulgorPCista", "FulgorPCista.exe")
+        legit_exes.add(os.path.normcase(os.path.abspath(canonical_exe)))
+
+        if getattr(sys, "frozen", False):
+            legit_exes.add(os.path.normcase(os.path.abspath(sys.executable)))
+
+        # Em modo dev, permitir binário compilado em dist
+        script_dir = os.path.dirname(os.path.abspath(__file__))
+        dev_exe = os.path.join(script_dir, "dist", "FulgorPCista.exe")
+        if os.path.exists(dev_exe):
+            legit_exes.add(os.path.normcase(os.path.abspath(dev_exe)))
+
+        for p in psutil.process_iter(["pid", "name", "exe", "cmdline"]):
             try:
                 pid = p.info["pid"]
                 if pid in (my_pid, parent_pid):
                     continue
-                pname = (p.info["name"] or "").lower()
-                if "fulgorpcista" in pname or "cputempmonitor" in pname:
-                    cmdline = [str(c).lower() for c in (p.info.get("cmdline") or [])]
-                    if "-daemon" in cmdline or "--daemon" in cmdline or "-service" in cmdline or "--service" in cmdline:
+
+                proc_exe = p.info.get("exe")
+                if not proc_exe:
+                    try:
+                        proc_exe = p.exe()
+                    except (psutil.AccessDenied, psutil.NoSuchProcess, psutil.ZombieProcess):
                         continue
+
+                if not proc_exe:
+                    continue
+
+                norm_proc_exe = os.path.normcase(os.path.abspath(proc_exe))
+                if norm_proc_exe not in legit_exes:
+                    continue
+
+                cmdline = [str(c).lower() for c in (p.info.get("cmdline") or [])]
+                if any(flag in cmdline for flag in ("-daemon", "--daemon", "-service", "--service")):
+                    continue
+
+                logging.info(f"Finalizando processo legado verificado PID={pid} ({norm_proc_exe})")
+                p.terminate()
+                try:
+                    p.wait(timeout=1.0)
+                except psutil.TimeoutExpired:
                     p.kill()
-            except Exception:
-                pass
-    except Exception:
-        pass
+
+            except (psutil.NoSuchProcess, psutil.AccessDenied, psutil.ZombieProcess):
+                continue
+            except Exception as pe:
+                logging.debug(f"Erro ao verificar processo PID={p.pid}: {pe}")
+
+    except Exception as e:
+        logging.debug(f"Exceção na limpeza de processos: {e}")
 
     try:
         if getattr(sys, "frozen", False):
             exe_dir = os.path.dirname(sys.executable)
-            for fname in os.listdir(exe_dir):
-                if ".old" in fname.lower() or ".del_" in fname.lower():
-                    try:
-                        os.remove(os.path.join(exe_dir, fname))
-                    except Exception:
-                        pass
+            if os.path.isdir(exe_dir):
+                for fname in os.listdir(exe_dir):
+                    if fname.lower().endswith((".old", ".del_")) or ".old." in fname.lower():
+                        try:
+                            os.remove(os.path.join(exe_dir, fname))
+                        except Exception:
+                            pass
     except Exception:
         pass
 
@@ -417,9 +490,16 @@ def main():
     threading.Thread(target=tray.setup_tray, daemon=True).start()
     threading.Thread(target=tray.listen_show_event, daemon=True).start()
 
-    logging.info(f"main: start_hidden={start_hidden}, launching webview.start()...")
+    appdata = os.environ.get("APPDATA") or os.path.expanduser("~")
+    storage_path = os.path.join(appdata, "FulgorPCista", "webview_data")
     try:
-        webview.start(debug=False)
+        os.makedirs(storage_path, exist_ok=True)
+    except Exception as e:
+        logging.warning(f"Failed to create storage_path {storage_path}: {e}")
+
+    logging.info(f"main: start_hidden={start_hidden}, launching webview.start(storage_path={storage_path}, private_mode=False)...")
+    try:
+        webview.start(debug=False, private_mode=False, storage_path=storage_path)
         logging.info("main: webview.start() completed normally.")
     except Exception as e:
         logging.error(f"main: webview.start() crashed with error: {e}", exc_info=True)

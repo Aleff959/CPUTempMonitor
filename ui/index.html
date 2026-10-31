@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Fulgor PCista (v1.8.0 - Ay)</title>
+  <title>Fulgor PCista (v1.9.0 - Black Lightning)</title>
   <style>
     :root {
       --md-sys-color-primary: #80d4ff;
@@ -22,6 +22,43 @@
       --md-sys-color-tertiary-container: #263e72;
       --md-sys-color-error: #ffb4ab;
       --font-family: 'Segoe UI Variable Display', 'Segoe UI', system-ui, -apple-system, sans-serif;
+      --font-mono: 'Consolas', monospace;
+
+      /* Variáveis de estilo de destaque e componentes */
+      --theme-color-scheme: dark;
+      --theme-icon-gradient: linear-gradient(135deg, #00b0ff, #0069c0);
+      --theme-icon-color: #ffffff;
+      --theme-icon-shadow: 0 2px 8px rgba(0, 176, 255, 0.35);
+      --theme-usb-badge-bg: rgba(76, 175, 80, 0.15);
+      --theme-usb-badge-color: #81c784;
+      --theme-usb-badge-border: rgba(129, 199, 132, 0.3);
+      --theme-version-tag-bg: rgba(255, 255, 255, 0.06);
+      --theme-version-tag-color: var(--md-sys-color-outline);
+      --theme-card-border: rgba(255, 255, 255, 0.05);
+      --theme-card-shadow: none;
+      --theme-modal-backdrop: rgba(0, 0, 0, 0.75);
+      --theme-modal-card-bg: #181c22;
+      --theme-modal-card-border: rgba(255, 255, 255, 0.1);
+      --theme-modal-title-color: #ffffff;
+      --theme-modal-close-btn-bg: rgba(255, 255, 255, 0.08);
+      --theme-modal-close-btn-color: var(--md-sys-color-outline);
+      --theme-modal-close-btn-hover-bg: rgba(255, 255, 255, 0.16);
+      --theme-modal-close-btn-hover-color: #ffffff;
+      --theme-btn-action-bg: var(--md-sys-color-primary);
+      --theme-btn-action-color: var(--md-sys-color-on-primary);
+      --theme-btn-action-hover-shadow: 0 2px 10px rgba(0, 176, 255, 0.4);
+      --theme-ext-link-hover-bg: rgba(128, 212, 255, 0.08);
+      --theme-ext-link-hover-border: rgba(128, 212, 255, 0.3);
+      --theme-segmented-bg: var(--md-sys-color-surface);
+      --theme-segmented-border: rgba(255, 255, 255, 0.08);
+      --theme-seg-btn-active-bg: var(--md-sys-color-secondary-container);
+      --theme-seg-btn-active-color: var(--md-sys-color-on-secondary-container);
+      --theme-slider-bg: #2b3036;
+      --theme-slider-border: rgba(255, 255, 255, 0.2);
+      --theme-slider-thumb: var(--md-sys-color-outline);
+      --theme-slider-checked-bg: #00472e;
+      --theme-slider-checked-border: #69f0ae;
+      --theme-slider-checked-thumb: #69f0ae;
     }
 
     * {
@@ -41,6 +78,7 @@
       overflow: hidden;
       display: flex;
       flex-direction: column;
+      color-scheme: var(--theme-color-scheme, dark);
     }
 
     /* Header Bar */
@@ -62,15 +100,15 @@
     .app-icon {
       width: 28px;
       height: 28px;
-      background: linear-gradient(135deg, #00b0ff, #0069c0);
+      background: var(--theme-icon-gradient);
       border-radius: 8px;
       display: flex;
       align-items: center;
       justify-content: center;
       font-size: 15px;
       font-weight: 800;
-      color: #ffffff;
-      box-shadow: 0 2px 8px rgba(0, 176, 255, 0.35);
+      color: var(--theme-icon-color);
+      box-shadow: var(--theme-icon-shadow);
     }
 
     .app-title {
@@ -82,8 +120,8 @@
 
     .version-tag {
       font-size: 11px;
-      color: var(--md-sys-color-outline);
-      background: rgba(255, 255, 255, 0.06);
+      color: var(--theme-version-tag-color);
+      background: var(--theme-version-tag-bg);
       padding: 3px 9px;
       border-radius: 12px;
       font-weight: 600;
@@ -94,9 +132,9 @@
       font-weight: 600;
       padding: 4px 11px;
       border-radius: 12px;
-      background: rgba(76, 175, 80, 0.15);
-      color: #81c784;
-      border: 1px solid rgba(129, 199, 132, 0.3);
+      background: var(--theme-usb-badge-bg);
+      color: var(--theme-usb-badge-color);
+      border: 1px solid var(--theme-usb-badge-border);
     }
 
     /* Main Container */
@@ -121,7 +159,8 @@
       display: flex;
       align-items: center;
       justify-content: space-between;
-      border: 1px solid rgba(255, 255, 255, 0.05);
+      border: 1px solid var(--theme-card-border);
+      box-shadow: var(--theme-card-shadow);
       position: relative;
       overflow: hidden;
     }
@@ -204,7 +243,8 @@
       display: flex;
       flex-direction: column;
       gap: 6px;
-      border: 1px solid rgba(255, 255, 255, 0.05);
+      border: 1px solid var(--theme-card-border);
+      box-shadow: var(--theme-card-shadow);
       transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
       position: relative;
       cursor: pointer;
@@ -258,6 +298,7 @@
     }
 
     .temp-val {
+      font-family: var(--font-mono, var(--font-family));
       font-size: 34px;
       font-weight: 800;
       letter-spacing: -0.8px;
@@ -305,7 +346,8 @@
       display: flex;
       align-items: center;
       justify-content: space-between;
-      border: 1px solid rgba(255, 255, 255, 0.05);
+      border: 1px solid var(--theme-card-border);
+      box-shadow: var(--theme-card-shadow);
       transition: all 0.25s;
     }
 
@@ -354,6 +396,7 @@
     }
 
     .mb-temp-val {
+      font-family: var(--font-mono, var(--font-family));
       font-size: 34px;
       font-weight: 800;
       letter-spacing: -0.5px;
@@ -375,7 +418,8 @@
       display: flex;
       flex-direction: column;
       gap: 10px;
-      border: 1px solid rgba(255, 255, 255, 0.05);
+      border: 1px solid var(--theme-card-border);
+      box-shadow: var(--theme-card-shadow);
     }
 
     .control-row {
@@ -403,10 +447,10 @@
 
     .segmented-button {
       display: inline-flex;
-      background: var(--md-sys-color-surface);
+      background: var(--theme-segmented-bg);
       border-radius: 24px;
       padding: 3px;
-      border: 1px solid rgba(255, 255, 255, 0.08);
+      border: 1px solid var(--theme-segmented-border);
       gap: 4px;
     }
 
@@ -423,8 +467,8 @@
     }
 
     .seg-btn.active {
-      background: var(--md-sys-color-secondary-container);
-      color: var(--md-sys-color-on-secondary-container);
+      background: var(--theme-seg-btn-active-bg);
+      color: var(--theme-seg-btn-active-color);
     }
 
     .auto-switch-row {
@@ -486,8 +530,8 @@
       left: 0;
       right: 0;
       bottom: 0;
-      background-color: #2b3036;
-      border: 2px solid rgba(255, 255, 255, 0.2);
+      background-color: var(--theme-slider-bg);
+      border: 2px solid var(--theme-slider-border);
       transition: .25s;
       border-radius: 22px;
     }
@@ -499,19 +543,19 @@
       width: 12px;
       left: 3px;
       bottom: 3px;
-      background-color: var(--md-sys-color-outline);
+      background-color: var(--theme-slider-thumb);
       transition: .25s cubic-bezier(0.4, 0, 0.2, 1);
       border-radius: 50%;
     }
 
     input:checked + .md3-slider {
-      background-color: #00472e;
-      border-color: #69f0ae;
+      background-color: var(--theme-slider-checked-bg);
+      border-color: var(--theme-slider-checked-border);
     }
 
     input:checked + .md3-slider:before {
       transform: translateX(18px);
-      background-color: #69f0ae;
+      background-color: var(--theme-slider-checked-thumb);
     }
 
     .control-note {
@@ -616,7 +660,7 @@
     .modal-backdrop {
       position: fixed;
       inset: 0;
-      background: rgba(0, 0, 0, 0.75);
+      background: var(--theme-modal-backdrop);
       backdrop-filter: blur(8px);
       -webkit-backdrop-filter: blur(8px);
       display: flex;
@@ -634,13 +678,13 @@
     }
 
     .modal-card {
-      background: #181c22;
+      background: var(--theme-modal-card-bg);
       border-radius: 22px;
       width: 90%;
       max-width: 480px;
       max-height: 88vh;
       overflow-y: auto;
-      border: 1px solid rgba(255, 255, 255, 0.1);
+      border: 1px solid var(--theme-modal-card-border);
       box-shadow: 0 24px 48px rgba(0, 0, 0, 0.8);
       padding: 20px 22px;
       display: flex;
@@ -648,6 +692,7 @@
       gap: 14px;
       transform: scale(0.92);
       transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+      color: var(--md-sys-color-on-surface);
     }
 
     .modal-backdrop.open .modal-card {
@@ -671,21 +716,21 @@
     .modal-icon {
       width: 36px;
       height: 36px;
-      background: linear-gradient(135deg, #00b0ff, #0069c0);
+      background: var(--theme-icon-gradient);
       border-radius: 10px;
       display: flex;
       align-items: center;
       justify-content: center;
       font-size: 18px;
       font-weight: 800;
-      color: #fff;
-      box-shadow: 0 4px 12px rgba(0, 176, 255, 0.35);
+      color: var(--theme-icon-color);
+      box-shadow: var(--theme-icon-shadow);
     }
 
     .modal-title {
       font-size: 16px;
       font-weight: 700;
-      color: #fff;
+      color: var(--theme-modal-title-color);
       letter-spacing: 0.3px;
     }
 
@@ -696,9 +741,9 @@
     }
 
     .modal-close-btn {
-      background: rgba(255, 255, 255, 0.08);
+      background: var(--theme-modal-close-btn-bg);
       border: none;
-      color: var(--md-sys-color-outline);
+      color: var(--theme-modal-close-btn-color);
       width: 28px;
       height: 28px;
       border-radius: 50%;
@@ -711,8 +756,8 @@
     }
 
     .modal-close-btn:hover {
-      background: rgba(255, 255, 255, 0.16);
-      color: #fff;
+      background: var(--theme-modal-close-btn-hover-bg);
+      color: var(--theme-modal-close-btn-hover-color);
     }
 
     .modal-body {
@@ -739,7 +784,8 @@
       background: var(--md-sys-color-surface);
       border-radius: 14px;
       padding: 11px 14px;
-      border: 1px solid rgba(255, 255, 255, 0.06);
+      border: 1px solid var(--theme-card-border);
+      box-shadow: var(--theme-card-shadow);
       display: flex;
       flex-direction: column;
       gap: 3px;
@@ -767,7 +813,8 @@
       background: var(--md-sys-color-surface);
       border-radius: 12px;
       padding: 10px 14px;
-      border: 1px solid rgba(255, 255, 255, 0.06);
+      border: 1px solid var(--theme-card-border);
+      box-shadow: var(--theme-card-shadow);
       display: flex;
       align-items: center;
       justify-content: space-between;
@@ -776,8 +823,8 @@
     }
 
     .ext-link-card:hover {
-      background: rgba(128, 212, 255, 0.08);
-      border-color: rgba(128, 212, 255, 0.3);
+      background: var(--theme-ext-link-hover-bg);
+      border-color: var(--theme-ext-link-hover-border);
       transform: translateX(2px);
     }
 
@@ -803,7 +850,8 @@
       background: var(--md-sys-color-surface);
       padding: 10px 12px;
       border-radius: 12px;
-      border: 1px solid rgba(255, 255, 255, 0.05);
+      border: 1px solid var(--theme-card-border);
+      box-shadow: var(--theme-card-shadow);
     }
 
     .tech-tags {
@@ -827,7 +875,8 @@
       background: var(--md-sys-color-surface);
       border-radius: 14px;
       padding: 12px 14px;
-      border: 1px solid rgba(255, 255, 255, 0.06);
+      border: 1px solid var(--theme-card-border);
+      box-shadow: var(--theme-card-shadow);
       display: flex;
       flex-direction: column;
       gap: 8px;
@@ -928,8 +977,8 @@
     }
 
     .btn-modal-close-action {
-      background: var(--md-sys-color-primary);
-      color: var(--md-sys-color-on-primary);
+      background: var(--theme-btn-action-bg);
+      color: var(--theme-btn-action-color);
       border: none;
       padding: 6px 16px;
       border-radius: 14px;
@@ -940,7 +989,7 @@
     }
 
     .btn-modal-close-action:hover {
-      box-shadow: 0 2px 10px rgba(0, 176, 255, 0.4);
+      box-shadow: var(--theme-btn-action-hover-shadow);
     }
 
     /* Central de Atualizações OTA */
@@ -948,7 +997,8 @@
       background: var(--md-sys-color-surface);
       border-radius: 12px;
       padding: 10px 12px;
-      border: 1px solid rgba(255, 255, 255, 0.08);
+      border: 1px solid var(--theme-card-border);
+      box-shadow: var(--theme-card-shadow);
       display: flex;
       flex-direction: column;
       gap: 8px;
@@ -1039,13 +1089,32 @@
     }
   </style>
   <link id="themeStylesheet" rel="stylesheet" href="">
+  <script>
+    (function() {
+      try {
+        var map = {
+          'ambar': 'themes/tema-ambar.css',
+          'terracota': 'themes/tema-manrope-terracota.css',
+          'terminal': 'themes/tema-terminal-matrix.css',
+          'synthwave': 'themes/tema-synthwave-neon.css',
+          'default': ''
+        };
+        var saved = localStorage.getItem('fulgor_theme') || 'ambar';
+        var href = map[saved] !== undefined ? map[saved] : map['ambar'];
+        var link = document.getElementById('themeStylesheet');
+        if (link && href) {
+          link.href = href;
+        }
+      } catch (e) {}
+    })();
+  </script>
 </head>
 <body>
   <div class="titlebar">
     <div class="app-branding">
       <div class="app-icon">⚡</div>
       <div class="app-title">Fulgor PCista</div>
-      <span class="version-tag" onclick="openAboutModal()" style="cursor: pointer;" title="Clique para abrir Sobre e Atualizações">v1.8.0 | Comp. 27</span>
+      <span class="version-tag" onclick="openAboutModal()" style="cursor: pointer;" title="Clique para abrir Sobre e Atualizações">v1.9.0 | Comp. 28</span>
     </div>
     <div class="usb-badge" id="usbStatusBadge">● Visor Digital Conectado</div>
   </div>
@@ -1233,7 +1302,7 @@
           <div class="modal-icon">⚡</div>
           <div>
             <div class="modal-title">Fulgor PCista</div>
-            <div class="modal-subtitle">v1.8.0 (Ay) • Comp. 27</div>
+            <div class="modal-subtitle">v1.9.0 (Black Lightning) • Comp. 28</div>
           </div>
         </div>
         <button class="modal-close-btn" onclick="closeAboutModal()" title="Fechar">✕</button>
@@ -1246,7 +1315,7 @@
           <div class="updater-card">
             <div class="updater-status-row">
               <div class="updater-info">
-                <span class="updater-version-label" id="updaterVersionLbl">Versão instalada: v1.8.0 (Comp. 27)</span>
+                <span class="updater-version-label" id="updaterVersionLbl">Versão instalada: v1.9.0 (Comp. 28)</span>
                 <span class="updater-status-sub" id="updaterStatusSub">Pronto para buscar novas atualizações no GitHub</span>
               </div>
               <button class="btn-check-update" id="btnCheckUpdate" onclick="triggerCheckUpdates()">
@@ -1396,7 +1465,7 @@
 
     let currentThemeKey = 'ambar';
 
-    function changeTheme(themeKey) {
+    function changeTheme(themeKey, syncBackend = true) {
       if (!themeFiles.hasOwnProperty(themeKey)) {
         themeKey = 'ambar';
       }
@@ -1409,17 +1478,22 @@
       const sel = document.getElementById('themeSelect');
       if (sel) sel.value = themeKey;
 
-      // Clean up any inline overrides on bannerUnitBadge so theme CSS rules take effect
-      const badge = document.getElementById('bannerUnitBadge');
-      if (badge && themeKey !== 'default') {
-        badge.style.background = '';
-        badge.style.color = '';
+      if (syncBackend && window.pywebview && window.pywebview.api && window.pywebview.api.set_theme) {
+        pywebview.api.set_theme(themeKey).catch(() => {});
       }
     }
 
-    function initTheme() {
-      const saved = localStorage.getItem('fulgor_theme') || 'ambar';
-      changeTheme(saved);
+    async function initTheme() {
+      let saved = localStorage.getItem('fulgor_theme');
+      if (!saved && window.pywebview && window.pywebview.api && window.pywebview.api.get_theme) {
+        try {
+          saved = await pywebview.api.get_theme();
+        } catch (e) {}
+      }
+      if (!saved) {
+        saved = 'ambar';
+      }
+      changeTheme(saved, false);
     }
 
     initTheme();
@@ -1661,38 +1735,14 @@
       if (active === 'CPU') {
         document.getElementById('bannerActiveDevice').innerText = 'Processador (CPU)';
         document.getElementById('bannerUnitBadge').innerText = 'Marcador do Visor: °C';
-        if (currentThemeKey === 'default') {
-          document.getElementById('bannerUnitBadge').style.background = '#004d6a';
-          document.getElementById('bannerUnitBadge').style.color = '#c4e7ff';
-          document.documentElement.style.setProperty('--md-sys-color-primary', '#80d4ff');
-        } else {
-          document.getElementById('bannerUnitBadge').style.background = '';
-          document.getElementById('bannerUnitBadge').style.color = '';
-        }
       } else if (active === 'GPU') {
         document.getElementById('bannerActiveDevice').innerText = 'Placa de Vídeo (GPU Hot Spot)';
         document.getElementById('bannerUnitBadge').innerText = 'Temperatura: °C (Visor: °F/W)';
         document.getElementById('bannerUnitBadge').title = 'Convenção do visor físico: o protocolo do microcontrolador liga o glifo W ao glifo °F. O valor numérico medido e exibido é sempre em Celsius (°C).';
-        if (currentThemeKey === 'default') {
-          document.getElementById('bannerUnitBadge').style.background = '#4a2800';
-          document.getElementById('bannerUnitBadge').style.color = '#ffdcbe';
-          document.documentElement.style.setProperty('--md-sys-color-primary', '#ffb77c');
-        } else {
-          document.getElementById('bannerUnitBadge').style.background = '';
-          document.getElementById('bannerUnitBadge').style.color = '';
-        }
       } else { // FPS & VRAM
         const bannerTxt = data.in_game ? 'Taxa de Quadros & VRAM (🎮 Jogo)' : 'Taxa de Quadros & VRAM';
         document.getElementById('bannerActiveDevice').innerText = bannerTxt;
         document.getElementById('bannerUnitBadge').innerText = 'Marcador do Visor: %';
-        if (currentThemeKey === 'default') {
-          document.getElementById('bannerUnitBadge').style.background = '#00472e';
-          document.getElementById('bannerUnitBadge').style.color = '#69f0ae';
-          document.documentElement.style.setProperty('--md-sys-color-primary', '#69f0ae');
-        } else {
-          document.getElementById('bannerUnitBadge').style.background = '';
-          document.getElementById('bannerUnitBadge').style.color = '';
-        }
       }
     }
 
@@ -1706,7 +1756,16 @@
       setTimeout(pollLoop, 800);
     }
 
-    window.addEventListener('pywebviewready', () => {
+    window.addEventListener('pywebviewready', async () => {
+      if (window.pywebview && window.pywebview.api && window.pywebview.api.get_theme) {
+        try {
+          const backendTheme = await pywebview.api.get_theme();
+          const localTheme = localStorage.getItem('fulgor_theme');
+          if (backendTheme && (!localTheme || backendTheme !== localTheme)) {
+            changeTheme(backendTheme, false);
+          }
+        } catch (e) {}
+      }
       pollLoop();
     });
   </script>
